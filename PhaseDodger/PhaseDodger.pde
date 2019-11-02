@@ -19,6 +19,7 @@ int highScore;
 int currentScore;
 int lives;
 int level;
+PFont font;
 
 void setup() {
 
@@ -31,11 +32,12 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = 0;
+  highScore = 100;
   currentScore = 0;
   lives = 3;
   level = 1;
   textMode(SHAPE); //Makes text not fuzzy
+  font = createFont("FreeMono", 16, true);
   
   // Player variables
   // Set up starting player location
@@ -172,22 +174,49 @@ void drawPlayer() {
 }
 
 void drawUI() {
-  scale(0.005, 0.005); //Scale UI down from the default (1,1) so it fits on screen
+  ortho(-200,200,200,-200);
+  //scale(0.005, 0.005); //Scale UI down from the default (1,1) so it fits on screen
   scale(1, -1); //Flip it 
   fill(0);
+  textFont(font, 12);
   textAlign(LEFT);
-  text("High Score: " + highScore, -190, -180);
-  text("Score: " + currentScore, 120, -180);
+
+  //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
+  String hsString = new Integer(highScore).toString(); 
+  int hsLen = hsString.length();
+  for (int i = 0; i < 6 - hsLen; i++) {
+    hsString = "0" + hsString;
+  }
+
+  text("High Score: " + hsString, -190, -180);
+
+  String csString = new Integer(currentScore).toString();
+  int csLen = csString.length();
+  for (int i = 0; i < 6 - csLen; i++) {
+    csString = "0" + csString;
+  }
+  text("Score: " + csString, 100, -180);
+
   textAlign(CENTER);
   text("LEVEL " + level, 0, -180);
+
+  noStroke();
   if (playerPhase) {
    fill(bluePhase);
   } else {
    fill(pinkPhase);
   }
+
+  int triWidth = 10;
+  int triHeight = 10;
+  int padding = 5;
+  int totalLength = (lives * (triWidth+padding)) - padding;
   if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
     for (int i = 0; i < lives; i++) {
-      triangle(-25 + (i*15), -170, -30 + (i*15), -160, -20 + (i*15), -160); //little player-life triangles offset by i
+      triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -170, //coords for point one (top)
+      -totalLength/2 + (i*(padding + triWidth)), -160, //coords for bottom left
+      (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-160); //coords for bottom right
     }
   }
+  stroke(0);
 }
