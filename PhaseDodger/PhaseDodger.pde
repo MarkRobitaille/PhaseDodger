@@ -1,7 +1,7 @@
 // CONSTANTS
 
 final float playerSpeed = 0.03;
-final boolean debug = false;
+final boolean debug = true;
 
 // Colors
 color bluePhase = color(135,206,250);
@@ -19,9 +19,10 @@ float gameSpeed;
 PVector[] playerPiece;
 PVector playerTranslation;
 float playerScale;
-
 boolean moveRight;
 boolean moveLeft;
+boolean moveUp;
+boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
 
@@ -62,6 +63,8 @@ void setup() {
   playerTranslation = new PVector(0.0, -0.8);
   moveRight = false;
   moveLeft = false;
+  moveUp = false;
+  moveDown = false;
   playerPhase = false; 
   playerAlive = true;
 }
@@ -136,6 +139,16 @@ void keyPressed() {
         case RIGHT:
           moveRight = true;
           break;
+        case UP:
+          if (debug) {
+            moveUp = true;
+          }
+          break;
+        case DOWN:
+          if (debug) {
+            moveUp = true;
+          }
+          break;
       }
     } else { // WASD keys and space bar
       switch(key) {
@@ -144,6 +157,16 @@ void keyPressed() {
           break;
         case 'd':
           moveRight = true;
+          break;
+        case 'w':
+          if (debug) {
+            moveUp = true;
+          }
+          break;
+        case 's':
+          if (debug) {
+            moveDown = true;
+          }
           break;
         case ' ':
           if (phaseHold) {
@@ -171,6 +194,16 @@ void keyReleased() {
         case RIGHT:
           moveRight = false;
           break;
+        case UP:
+          if (debug) {
+            moveUp = false;
+          }
+          break;
+        case DOWN:
+          if (debug) {
+            moveUp = false;
+          }
+          break;
       }
     } else { // WASD keys and space bar
       switch(key) {
@@ -181,6 +214,16 @@ void keyReleased() {
         case 'd':
           //playerTranslation.x +=0.01;
           moveRight = false;
+          break;
+        case 'w':
+          if (debug) {
+            moveUp = false;
+          }
+          break;
+        case 's':
+          if (debug) {
+            moveDown = false;
+          }
           break;
         case ' ':
           if (phaseHold) {
@@ -201,6 +244,14 @@ void updatePlayer() {
     playerTranslation.x -= playerSpeed;
   } else if (moveRight && !moveLeft && playerTranslation.x + playerSpeed <=1 - playerScale) { // Moving right
     playerTranslation.x += playerSpeed;
+  }
+  
+  if (debug) {
+    if (moveUp && !moveDown && playerTranslation.y + playerSpeed <=1 - playerScale) { // Moving left
+      playerTranslation.y += playerSpeed;
+    } else if (moveDown && !moveUp && playerTranslation.y - playerSpeed>=-1 + playerScale) { // Moving right
+      playerTranslation.y -= playerSpeed;
+    }
   }
 }
 
