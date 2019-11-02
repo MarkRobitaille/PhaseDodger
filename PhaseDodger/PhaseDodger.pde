@@ -33,10 +33,10 @@ int currentScore;
 int lives;
 int level;
 PFont font;
-
+blockGenerator gen;
 void setup() {
-
-  size(800, 800, P3D);
+  gen = new blockGenerator(8, 1, -1);
+  size(600, 600, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   
@@ -75,27 +75,28 @@ void draw() {
   background(255,255,255);
   
   if (gameMode == 0) { // Playing game
-    // Process things here
+    gen.run(0.01);
     updatePlayer();
     
-    // CHECK FOR COLLISIONS
+     //CHECK FOR COLLISIONS
     
-    //// Find player's hitbox details (hitbox is circle) 
-    //PVector hitboxPos = new PVector();
-    //hitbox = playerTranslation.copy();
-    //hitbox.y -= 0.025;
-    //float hitboxRadius = playerScale/2;
+    // Find player's hitbox details (hitbox is circle) 
+    PVector hitboxPos = new PVector();
+    hitboxPos = playerTranslation.copy();
+    hitboxPos.y -= 0.025;
+    float hitboxRadius = playerScale/2;
     
-    //boolean hit = false; 
+    boolean hit = false; 
     
-    //for (int i=0; i<gameBlocks.size() && !hit; i++) {
-    //  hit = checkHitRect(hitboxPos, hitboxRadius, gameBlocks.get().pos, gameBlocks.get().w, gameBlocks.get().h);
-    //}
+    for (int i=0; i<gen.blockList.size() && !hit; i++) {
+      gameBlock currBlock = gen.blockList.get(i);
+      hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
+    }
     
-    //playerAlive = !hit;
+    playerAlive = !hit;
     
     // Draw things here
-    
+    stroke(0);
     drawPlayer();
     
     // If player is dead, pause block movement, player turns red, lose life, start again?
@@ -106,7 +107,7 @@ void draw() {
     // Update score (count and remove blocks off screen)
     
     drawUI();
-
+  noStroke();
   } else if (gameMode == 1) { // Main menu
   
   } else { // Game over screen
@@ -115,17 +116,20 @@ void draw() {
 }
 
 // Return true if player's circular hitbox overlapped with rectangle
-boolean checkHitRect(PVector playerPos, float playerRadius, PVector rectPos, float rectWidth, float rectHeight) {
+boolean checkHitRect(PVector playerPos, float playerRadius, PVector rectPos, float rectWidth, float rectHeight, boolean trueBlue,boolean empty) {
   boolean hit = true;
   
   float distX = Math.abs(playerPos.x - rectPos.x);
   float distY = Math.abs(playerPos.y - rectPos.y);
-  
-  if (distX > (playerRadius + rectWidth/2) || distY > (playerRadius + rectHeight/2)) {
+  if(empty){
+    hit =false;
+  }else if (distX > (playerRadius + rectWidth/2) || distY > (playerRadius + rectHeight/2)) {
     // Player is safely out of range
     hit = false;
+  }else if(playerPhase == trueBlue){
+    hit = false;
   }
-  
+ 
   return hit;
 }
   
