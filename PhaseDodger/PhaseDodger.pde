@@ -14,6 +14,11 @@ boolean playerPhase; // False is pink, true is blue
 color bluePhase = color(135,206,250);
 color pinkPhase = color(255,192,203);
 
+// UI variables
+int highScore;
+int currentScore;
+int lives;
+
 void setup() {
 
   size(800, 800, P3D);
@@ -23,6 +28,12 @@ void setup() {
   // Game state variables
   gameMode = 0; // CHANGE TO 1 (TITLE SCREEN) ONCE IMPLEMENTED
   phaseHold = false; // Default is swap phase with space
+
+  // Initialize UI Variables
+  highScore = 0;
+  currentScore = 0;
+  lives = 3;
+  textMode(SHAPE); //Makes text not fuzzy
   
   // Player variables
   // Set up starting player location
@@ -50,6 +61,7 @@ void draw() {
     drawPlayer();
     
     // Draw UI last
+    drawUI();
     
   } else if (gameMode == 1) { // Main menu
   
@@ -155,4 +167,25 @@ void drawPlayer() {
   
   strokeWeight(1);
   resetMatrix();
+}
+
+void drawUI() {
+  scale(0.005, 0.005); //Scale UI down from the default (1,1) so it fits on screen
+  scale(1, -1); //Flip it 
+  fill(0);
+  textAlign(LEFT);
+  text("High Score: " + highScore, -190, -180);
+  text("Score: " + currentScore, 120, -180);
+  textAlign(CENTER);
+  text("LEVEL 1", 0, -180);
+  if (playerPhase) {
+   fill(bluePhase);
+  } else {
+   fill(pinkPhase);
+  }
+  if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
+    for (int i = 0; i < lives; i++) {
+      triangle(-25 + (i*15), -170, -30 + (i*15), -160, -20 + (i*15), -160); //little player-life triangles offset by i
+    }
+  }
 }
