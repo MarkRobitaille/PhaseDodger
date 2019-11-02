@@ -34,7 +34,7 @@ int lives;
 int level;
 PFont font;
 PImage splashImg;
-
+blockGenerator gen;
 void setup() {
   gen = new blockGenerator(8, 1, -1);
   size(600, 600, P3D);

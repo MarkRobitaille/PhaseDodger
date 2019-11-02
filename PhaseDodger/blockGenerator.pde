@@ -7,6 +7,7 @@ class blockGenerator{
     float bottom;
     float[] lanes;
     float numLanes;
+    int blockScore;
 public blockGenerator(float numLanes, float top, float bottom){
     //largeList = new ArrayList();
     this.lanes = new float[int(numLanes)];
