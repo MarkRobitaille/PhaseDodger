@@ -14,7 +14,7 @@ int gameMode; // For now default to right in the game, change once title screen 
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
-
+int[] levelArray = {50, 150, 500, 1000, 2000, 4000, 8000, 16000, 320000};
 // Player variables
 PVector[] playerPiece;
 PVector playerTranslation;
@@ -36,7 +36,7 @@ PFont font;
 PImage splashImg;
 blockGenerator gen;
 void setup() {
-  gen = new blockGenerator(8, 1, -1);
+  gen = new blockGenerator(2, 1, -1);
   size(600, 600, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
@@ -78,6 +78,8 @@ void draw() {
   
   if (gameMode == 0) { // Playing game
     gen.run(0.01);
+    currentScore += gen.getBlockScore();
+    changeLevel();
     updatePlayer();
     
      //CHECK FOR COLLISIONS
@@ -325,6 +327,16 @@ void drawPlayer() {
   if (debug) {
     ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
   }
+}
+public void changeLevel(){
+  if(currentScore >= levelArray[level -1]){
+    gen.levelOver = true;
+  }
+  if(gen.nextLevel()){
+    level++;
+    gen.levelOver = false;
+    gen = new blockGenerator(level+1, 1,-1) ;
+}
 }
 
 void drawUI() {
