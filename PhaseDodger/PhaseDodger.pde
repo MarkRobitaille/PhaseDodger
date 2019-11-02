@@ -37,7 +37,7 @@ PImage splashImg;
 blockGenerator gen;
 void setup() {
   gen = new blockGenerator(2, 1, -1);
-  size(600, 600, P3D);
+  size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   
