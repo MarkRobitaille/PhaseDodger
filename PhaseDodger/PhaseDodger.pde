@@ -18,6 +18,7 @@ void setup() {
 
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
+  //surface.setResizable(true);
   ortho(-1, 1, 1, -1);
   
   // Game state variables
