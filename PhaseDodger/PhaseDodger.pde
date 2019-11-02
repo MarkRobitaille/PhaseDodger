@@ -18,6 +18,7 @@ color pinkPhase = color(255,192,203);
 int highScore;
 int currentScore;
 int lives;
+int level;
 
 void setup() {
 
@@ -33,6 +34,7 @@ void setup() {
   highScore = 0;
   currentScore = 0;
   lives = 3;
+  level = 1;
   textMode(SHAPE); //Makes text not fuzzy
   
   // Player variables
@@ -62,7 +64,7 @@ void draw() {
     
     // Draw UI last
     drawUI();
-    
+
   } else if (gameMode == 1) { // Main menu
   
   } else { // Game over screen
@@ -177,7 +179,7 @@ void drawUI() {
   text("High Score: " + highScore, -190, -180);
   text("Score: " + currentScore, 120, -180);
   textAlign(CENTER);
-  text("LEVEL 1", 0, -180);
+  text("LEVEL " + level, 0, -180);
   if (playerPhase) {
    fill(bluePhase);
   } else {
