@@ -37,7 +37,7 @@ void setup() {
   lives = 3;
   level = 1;
   textMode(SHAPE); //Makes text not fuzzy
-  font = createFont("FreeMono", 16, true);
+  font = loadFont("JoystixMonospace-Regular-20.vlw");
   
   // Player variables
   // Set up starting player location
@@ -178,7 +178,7 @@ void drawUI() {
   //scale(0.005, 0.005); //Scale UI down from the default (1,1) so it fits on screen
   scale(1, -1); //Flip it 
   fill(0);
-  textFont(font, 12);
+  textFont(font, 10);
   textAlign(LEFT);
 
   //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
