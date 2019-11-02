@@ -34,6 +34,7 @@ int lives;
 int level;
 PFont font;
 PImage splashImg;
+
 blockGenerator gen;
 void setup() {
   gen = new blockGenerator(8, 1, -1);
@@ -80,7 +81,7 @@ void draw() {
     gen.run(0.01);
     updatePlayer();
     
-     //CHECK FOR COLLISIONS
+    //CHECK FOR COLLISIONS
     
     // Find player's hitbox details (hitbox is circle) 
     PVector hitboxPos = new PVector();
@@ -130,8 +131,21 @@ void draw() {
       line(-150, 210, textWidth("SWAP")-150, 210);
     }
     strokeWeight(1);
+  } else if (gameMode == 2) { // pause screen
+    noStroke();
+    gen.drawBlocks();
+    stroke(0);
+    drawPlayer();
+    drawUI();
+
+
+
   } else { // Game over screen
-    
+    noStroke();
+    gen.drawBlocks();
+    stroke(0);
+    drawPlayer();
+
   }
 }
 
@@ -199,6 +213,9 @@ void keyPressed() {
             playerPhase = !playerPhase;
           }
           break;
+        case 'p':
+          gameMode = 2;
+          break;
       }
     }
   } else if (gameMode == 1) { // Main menu
@@ -224,6 +241,16 @@ void keyPressed() {
           break;
       }
     }
+  } else if (gameMode == 2) { //paused
+    switch(key) {
+      case 'p':
+        gameMode = 0;
+        break;
+      case ' ':
+        gameMode = 0;
+        break;
+    }
+
   } else { // Game over screen
     
   }
@@ -371,4 +398,9 @@ void drawUI() {
     }
   }
   stroke(0);
+
+  fill(0);
+  if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
+    text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
+  }
 }
