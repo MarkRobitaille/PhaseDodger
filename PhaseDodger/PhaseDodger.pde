@@ -33,7 +33,8 @@ int currentScore;
 int lives;
 int level;
 PFont font;
-blockGenerator gen;
+PImage splashImg;
+
 void setup() {
   gen = new blockGenerator(8, 1, -1);
   size(600, 600, P3D);
@@ -41,7 +42,7 @@ void setup() {
   ortho(-1, 1, 1, -1);
   
   // Game state variables
-  gameMode = 0; // CHANGE TO 1 (TITLE SCREEN) ONCE IMPLEMENTED
+  gameMode = 1; // CHANGE TO 1 (TITLE SCREEN) ONCE IMPLEMENTED
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
@@ -51,6 +52,7 @@ void setup() {
   level = 1;
   textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
+  splashImg = loadImage("SplashLogo.png");
   
   // Player variables
   // Set up starting player location
@@ -109,7 +111,25 @@ void draw() {
     drawUI();
   noStroke();
   } else if (gameMode == 1) { // Main menu
-  
+    ortho(-400,400,400,-400);
+    scale(1,-1);
+    fill(0);
+    textFont(font, 20);
+    textAlign(LEFT);
+    image(splashImg, -300, -200);
+
+    text("PHASE TYPE", floor(-textWidth("PHASE TYPE")/2 + 0.5), 100);
+    text("SWAP", -150, 200);
+    text("HOLD", 150-textWidth("HOLD"), 200);
+    text("PRESS SPACE TO START", floor(-textWidth("PRESS SPACE TO START")/2 + 0.5), 300);
+
+    strokeWeight(2);
+    if (phaseHold) {
+      line(150-textWidth("HOLD"), 210, 150, 210);
+    } else {
+      line(-150, 210, textWidth("SWAP")-150, 210);
+    }
+    strokeWeight(1);
   } else { // Game over screen
     
   }
@@ -182,7 +202,28 @@ void keyPressed() {
       }
     }
   } else if (gameMode == 1) { // Main menu
-  
+    if (key == CODED) { // Arrow keys
+      switch(keyCode) {
+        case LEFT:
+          phaseHold = false;
+          break;
+        case RIGHT:
+          phaseHold = true;
+          break;
+      }
+    } else { // WASD keys and space bar
+      switch(key) {
+        case 'a':
+          phaseHold = false;
+          break;
+        case 'd':
+          phaseHold = true;
+          break;
+        case ' ':
+          gameMode = 0;
+          break;
+      }
+    }
   } else { // Game over screen
     
   }
@@ -287,11 +328,10 @@ void drawPlayer() {
 }
 
 void drawUI() {
-  ortho(-200,200,200,-200);
-  //scale(0.005, 0.005); //Scale UI down from the default (1,1) so it fits on screen
+  ortho(-400,400,400,-400);
   scale(1, -1); //Flip it 
   fill(0);
-  textFont(font, 10);
+  textFont(font, 20);
   textAlign(LEFT);
 
   //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
@@ -301,17 +341,16 @@ void drawUI() {
     hsString = "0" + hsString;
   }
 
-  text("High Score: " + hsString, -190, -180);
+  text("HighScore: " + hsString, -380, -360);
 
   String csString = new Integer(currentScore).toString();
   int csLen = csString.length();
   for (int i = 0; i < 6 - csLen; i++) {
     csString = "0" + csString;
   }
-  text("Score: " + csString, 100, -180);
+  text("Score: " + csString, 380-textWidth("Score: " + csString), -360);
 
-  textAlign(CENTER);
-  text("LEVEL " + level, 0, -180);
+  text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
 
   noStroke();
   if (playerPhase) {
@@ -320,15 +359,15 @@ void drawUI() {
    fill(pinkPhase);
   }
 
-  int triWidth = 10;
-  int triHeight = 10;
-  int padding = 5;
+  int triWidth = 20;
+  int triHeight = 20;
+  int padding = 10;
   int totalLength = (lives * (triWidth+padding)) - padding;
   if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
     for (int i = 0; i < lives; i++) {
-      triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -170, //coords for point one (top)
-      -totalLength/2 + (i*(padding + triWidth)), -160, //coords for bottom left
-      (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-160); //coords for bottom right
+      triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
+      -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
+      (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
     }
   }
   stroke(0);
