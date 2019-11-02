@@ -17,26 +17,23 @@ this.pos= pos; this.w = size; this.trueBlue = blockColor; this.h = size; this.em
 }
 public void drawMe(){
     
+    if(!empty){
     float xoff = w/2;
     float yoff = h/2;
-    if(!empty){
+    
     //noStroke();
     if(trueBlue){
         fill(this.blue);
     }else{
         fill(this.pink);
     }
-    }else{
-        noStroke();
-        noFill();
-    }
-    beginShape(QUADS);
+     beginShape(QUADS);
     vertex(pos.x - xoff, pos.y + yoff, pos.z);
     vertex(pos.x + xoff, pos.y + yoff, pos.z);
     vertex(pos.x + xoff, pos.y - yoff, pos.z);
     vertex(pos.x - xoff, pos.y - yoff, pos.z); 
     endShape(); 
-    
+    }
 }
 
 public void updatePos(float speed){
