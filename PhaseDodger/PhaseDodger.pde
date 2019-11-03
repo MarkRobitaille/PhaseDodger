@@ -101,7 +101,7 @@ void setup() {
   gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   deathSound = new SoundFile(this, "ship-explosion.mp3");
-  
+  //gameOverSound = new SoundFile(this, "Retro-game-over-sound-effect.mp3");
   // Initialize game state variables
   gameMode = 1;
   phaseHold = false; // Default is swap phase with space
@@ -646,6 +646,8 @@ void drawUI() {
     gameMusic.loop();
   }else if(gameMode == 4){ //gameOverMusic
     gameMusic.stop();
+    //gameOverSound.play();
+    
   }
     
   
