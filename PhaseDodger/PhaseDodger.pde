@@ -52,7 +52,7 @@ void setup() {
 
   // Initialize UI Variables
   highScore = 100;
-  currentScore = 3000;
+  currentScore = 0;
   lives = 3;
   level = 1;
   textMode(SHAPE); //Makes text not fuzzy
