@@ -21,19 +21,21 @@ PImage image;
 	}
 
 
-	public boolean drawMe(int dt) { //returns killme to see if we should delete
+	public boolean update(int dt) { //returns killme to see if we should delete
 		pos.x += vel.x * dt / 16;
 		pos.y += vel.y * dt / 16;
 		age += dt;
-		float currentSize = (((((float)age/(float)lifetime)) * sizeOverLiftime) + 1) * size;
-		imageMode(CENTER);
-		image(image, pos.x, pos.y, currentSize, currentSize);
-		imageMode(CORNER);
 		if (age >= lifetime) {
 			killme = true;
 		}
 		return killme;
+	}
 
+	public void drawMe() {
+		float currentSize = (((((float)age/(float)lifetime)) * sizeOverLiftime) + 1) * size;
+		imageMode(CENTER);
+		image(image, pos.x, pos.y, currentSize, currentSize);
+		imageMode(CORNER);
 	}
 
 

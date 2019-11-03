@@ -114,12 +114,14 @@ void setup() {
   deathSound = minim.loadFile("ship-explosion.mp3");
   
   //gameOverSound = new SoundFile(this, "Retro-game-over-sound-effect.mp3");
+
   // Initialize game state variables
   gameMode = 1;
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = int(scoreString[0]);
+  //highScore = int(scoreString[0]);
+  highScore = 0;
   currentScore = 0;
   lives = 3;
   level = 1;
@@ -224,6 +226,7 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      playerExplosion.update();
       playerExplosion.drawMe();
       drawUI();
       if (deathTimer + 2000 < millis()) {
@@ -284,6 +287,9 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      if (!playerAlive) {
+        playerExplosion.drawMe();
+      }
     }
     drawUI();
   } else if (gameMode == 4) { // Game over screen
@@ -436,6 +442,7 @@ void keyPressed() {
       case 'q':
         resetGame();
         gameMusic.pause();
+        gameMusic.rewind();
         break;
       case ' ':
         gameMode = 0;
@@ -619,7 +626,7 @@ void addEnemy() {
 void updateEnemies() {
   for (int i=0; i<gameEnemies.size(); i++) {
     gameEnemy currEnemy = gameEnemies.get(i);
-    currEnemy.update(0.0075);
+    currEnemy.update(0.0065 + (0.0005*level));
     if (currEnemy.isOffScreen() || currEnemy.hitPlayer) {
       gameEnemies.remove(currEnemy);
       currentScore+=20;
@@ -764,6 +771,9 @@ void drawUI() {
     if (gameOverStep == 4 && newHighScore) {
       if (highScore < currentScore) {
         highScore += 1;
+        if (!scoreSound.isPlaying()) {
+          scoreSound.play();
+        }
       } else {
         gameOverStep += 1;
       }
@@ -804,6 +814,9 @@ void resetGame() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  deathTimer = 0;
+  deathStep = 0;
+  playerRotation = 0.0;
   
   // Enemy variables
   gameEnemies = new ArrayList();
