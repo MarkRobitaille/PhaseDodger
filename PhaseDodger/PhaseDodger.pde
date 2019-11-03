@@ -50,19 +50,16 @@ PImage splashImg;
 
 //File I/0
 String highscoreFile = "highscore.txt";
-BufferedReader highscoreReader;
-PrintWriter highscoreWriter;
+//BufferedReader highscoreReader;
+//PrintWriter highscoreWriter
+ String scoreString[];
 void setup() {
-  highscoreReader = createReader(highscoreFile);
-  highscoreWriter = createWriter(highscoreFile);
-  String scoreString;
-  try{
-  scoreString = highscoreReader.readLine();
-  }catch (IOException e) {
-    e.printStackTrace();
-    scoreString = null;
-  }
+ // highscoreReader = createReader(highscoreFile);
+  //highscoreWriter = createWriter(highscoreFile);
  
+
+  scoreString = loadStrings("highscore.txt");
+   
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
@@ -73,7 +70,7 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = int(scoreString);
+  highScore = int(scoreString[0]);
   currentScore = 0;
   lives = 3;
   level = 1;
@@ -153,12 +150,16 @@ void draw() {
       gameMode = 4;
       timer = millis();
       newHighScore = currentScore > highScore;
+      if(newHighScore){
+      scoreString[0] = Integer.toString(currentScore);
+      saveStrings("data/highScore.txt", scoreString);
+      }
     }
     
     // Draw UI last
     
     
-    // Update score (count and remove blocks off screen)
+   
     
     drawUI();
   noStroke();
