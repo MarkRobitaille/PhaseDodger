@@ -20,8 +20,7 @@ public void drawMe(){
     if(!empty){
     float xoff = w/2;
     float yoff = h/2;
-    
-    //noStroke();
+    noStroke();
     if(trueBlue){
         fill(this.blue);
     }else{

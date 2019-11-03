@@ -15,6 +15,10 @@ int gameMode; // For now default to right in the game, change once title screen 
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
+blockGenerator gen;
+
+//int[] levelArray = {100, 500, 1000};
+
 // Player variables
 PVector[] playerPiece;
 PVector playerTranslation;
@@ -34,7 +38,11 @@ int lives;
 int level;
 PFont font;
 PImage splashImg;
-blockGenerator gen;
+
+//File I/0
+String highscoreFile = "highscore.txt";
+BufferedReader highscoreReader;
+PrintWriter highscoreWriter;
 void setup() {
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
@@ -144,11 +152,13 @@ boolean checkHitRect(PVector playerPos, float playerRadius, PVector rectPos, flo
   float distX = Math.abs(playerPos.x - rectPos.x);
   float distY = Math.abs(playerPos.y - rectPos.y);
   if(empty){
+    //block is empty
     hit =false;
   }else if (distX > (playerRadius + rectWidth/2) || distY > (playerRadius + rectHeight/2)) {
     // Player is safely out of range
     hit = false;
   }else if(playerPhase == trueBlue){
+    //player matches the color
     hit = false;
   }
  
@@ -329,8 +339,10 @@ void drawPlayer() {
   }
 }
 public void changeLevel(){
+  if(level < levelArray.length){
   if(currentScore >= levelArray[level -1]){
     gen.levelOver = true;
+  }
   }
   if(gen.nextLevel()){
     level++;
