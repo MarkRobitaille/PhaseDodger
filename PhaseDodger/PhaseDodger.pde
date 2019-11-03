@@ -583,7 +583,6 @@ void resetGame() {
   level = 1;
 
   newHighScore = false;
-  countingScore = false;
   gameOverStep = 0;
   
   // Player variables
