@@ -262,14 +262,14 @@ void draw() {
     menuMusic.loop();
   }
   
-  } else if (gameMode == 2) { // pause screen
-    noStroke();
-    gen.drawBlocks();
-    drawEnemies();
-    stroke(0);
-    drawPlayer();
-  
-    
+  } else if (gameMode == 2) { // Pause screen
+    if (deathStep!=1) {
+      noStroke();
+      gen.drawBlocks();
+      drawEnemies();
+      stroke(0);
+      drawPlayer();
+    }
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
@@ -686,9 +686,9 @@ void drawUI() {
     fill(0);
     
     if (deathStep==1 && lives!=2) {
-      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), -100);
     } else if (deathStep==1) {
-      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), -100);
     } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
