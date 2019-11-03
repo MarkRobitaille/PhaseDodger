@@ -46,7 +46,7 @@ boolean newHighScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
-
+PImage alienImg;
 //File I/0
 String highscoreFile = "highscore.txt";
 //BufferedReader highscoreReader;
@@ -55,7 +55,7 @@ String highscoreFile = "highscore.txt";
 void setup() {
  // highscoreReader = createReader(highscoreFile);
   //highscoreWriter = createWriter(highscoreFile);
- 
+ alienImg = loadImage("data/enemy.png");
 
   scoreString = loadStrings("highscore.txt");
    
@@ -452,7 +452,7 @@ void addEnemy() {
   
   if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
     PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
-    gameEnemies.add(new gameEnemy(startLocation, playerTranslation)); 
+    gameEnemies.add(new gameEnemy(startLocation, playerTranslation, alienImg)); 
   }
 }
 
