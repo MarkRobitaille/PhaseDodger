@@ -64,9 +64,12 @@ SoundFile gameMusic;
 SoundFile deathSound;
 SoundFile gameOverSound;
 SoundFile menuMusic;
-void setup() {
+  //particle system testing
+  particleSystem testSystem;
+  PImage testParticle;
 
- //alienImg = loadImage("data/enemy.png");
+ String scoreString[];
+void setup() {
   enemyImgArray = new PImage[6];
   enemyImgArray[0] = loadImage("data/enemy.png");
   enemyImgArray[1] = loadImage("data/enemy2.png");
@@ -84,14 +87,18 @@ void setup() {
   pinkShip[1] = loadImage("data/playerpink.png");
   pinkShip[2] = loadImage("data/playerpinkright.png");
   
+  testParticle = loadImage("data/explosion.png");
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
+
   scoreString = loadStrings("highscore.txt");
    
   gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   size(800,800, P3D);
-  //surface.setResizable(true); // Make it work maximized?
+  surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
+  smooth(4);
   
   // Game state variables
   gameMode = 1;
@@ -139,7 +146,15 @@ void setup() {
 void draw() {
   resetMatrix();
   ortho(-1, 1, 1, -1);
-  background(255,255,255);
+  background(0,0,0);
+  if (width>height) {
+    scale((float)height/(float)width, 1);
+  }else {
+    scale(1, (float)width/(float)height);
+  }
+  
+  fill(255,255,255);
+  rect(-1, -1, 2, 2);
   
   if (gameMode == 0) { // Playing game
     if (playerAlive) {
@@ -179,13 +194,15 @@ void draw() {
       
       stroke(0);
       drawPlayer();
+
+      //testSystem.drawMe();
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
         deathTimer=millis();
       }
       
-      // Draw UI last
+      //// Draw UI last
       drawUI();
     } else if (deathStep == 0) {
       playerRotation+=0.2;
@@ -264,6 +281,16 @@ void draw() {
     } else {
       drawUI();
     }
+  }
+  
+  
+  if (height>width) {
+    resetMatrix();
+    ortho(-1, 1, 1, -1);
+    scale(1, (float)width/(float)height);
+    fill(0,0,0);
+    rect(-1,1,2,4);
+    rect(-1,-5,2,4);
   }
 }
 
@@ -459,12 +486,16 @@ void updatePlayer() {
 
 void drawPlayer() {
   // Translate to player location, draw player, resetMatrix at the end
-  
   translate(playerTranslation.x, playerTranslation.y);
   rotate(playerRotation);
   scale(playerScale, playerScale);
   
   imageMode(CENTER);
+  
+  if (!playerAlive) {
+    tint(255, 0, 0);
+  }
+  
   if (playerPhase) { // (playerPhase && playerAlive) { // Then in else have red ship?
     if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
       image(blueShip[1], 0, 0, 2, 2);
@@ -483,11 +514,14 @@ void drawPlayer() {
     }
   }
   
-  //if(!playerAlive) {
-  //  fill(255,0,0);
-  //}
-  
+  noTint();
   resetMatrix();
+  
+  if (width>height) {
+    scale((float)height/(float)width, 1);
+  }else {
+    scale(1, (float)width/(float)height);
+  }
   strokeWeight(1);
   if (debug) {
     fill(0);
@@ -507,21 +541,20 @@ void resetAfterDeath() {
 
 public void changeLevel(){
   if(level < levelArray.length){
-  if(currentScore >= levelArray[level -1]){
-    gen.levelOver = true;
-  }
+    if(currentScore >= levelArray[level -1]){
+      gen.levelOver = true;
+    }
   }
   if(gen.nextLevel()){
     level++;
     gen.levelOver = false;
     gen = new blockGenerator(level+1, 1,-1) ;
-}
+  }
 }
 
 // ENEMY METHODS
 
 void addEnemy() {
-  
   // Find level value
   int levelValue = 0; // if less than 5 levels
   if (level>=5 && level<8) {
@@ -529,8 +562,6 @@ void addEnemy() {
   } else if (level>=8) {
     levelValue = 2;
   }
-  
-  //System.out.println(levelValue);
   
   if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()) {
     PVector startLocation = new PVector((float)Math.random()*1.5-1.0,  1.25);
@@ -572,7 +603,7 @@ boolean checkEnemyCollisions(PVector playerPos, float playerRadius) {
 
 void drawUI() {
   ortho(-400,400,400,-400);
-  scale(1, -1); //Flip it 
+  scale(1, -1); // Flip it 
   fill(0);
   textFont(font, 20);
   textAlign(LEFT);
@@ -621,16 +652,12 @@ void drawUI() {
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
       for (int i = 0; i < lives-1; i++) {
         image(lifeImage, (-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), 330, 20, 20);
-        
-        //triangle((-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), -340, //coords for point one (top)
-        //-totalLength/2 + (i*(padding + shipSize)), -320, //coords for bottom left
-        //(-totalLength/2 + shipSize) + (i*(padding + shipSize)),-320); //coords for bottom right
       }
     }
     
     scale(1, -1);
 
-    // If you want 
+    // If you want triangles instead of ship icons
 
     //if (playerPhase) {
     // fill(bluePhase);
@@ -705,6 +732,8 @@ void drawUI() {
 void resetGame() {
   gen = new blockGenerator(2, 1, -1);
   gameMode = 1; 
+
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
 
   currentScore = 0;
   lives = 3;
