@@ -193,6 +193,7 @@ void draw() {
     fill(0);
     textFont(font, 20);
     textAlign(LEFT);
+    imageMode(CORNER);
     image(splashImg, -300, -200);
 
     text("HIGHSCORE: " + highScore, floor(-textWidth("HIGHSCORE" + highScore)/2 + 0.5), -360);
