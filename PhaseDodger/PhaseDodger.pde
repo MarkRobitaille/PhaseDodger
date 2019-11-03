@@ -66,7 +66,7 @@ AudioPlayer gameMusic;
 AudioPlayer deathSound;
 AudioPlayer gameOverSound;
 AudioPlayer menuMusic;
-
+AudioPlayer scoreSound;
 // particle system testing
 particleSystem playerExplosion;
 PImage explosionImage;
@@ -112,7 +112,7 @@ void setup() {
   gameMusic = minim.loadFile("PegJam2019 - Phase Dodger - 1 - Gameplay.mp3");
   menuMusic = minim.loadFile("PhaseDodgerMenu.mp3");
   deathSound = minim.loadFile("ship-explosion.mp3");
-  
+  scoreSound = minim.loadFile("coinsound.wav");
   //gameOverSound = new SoundFile(this, "Retro-game-over-sound-effect.mp3");
 
   // Initialize game state variables
@@ -772,6 +772,7 @@ void drawUI() {
       if (highScore < currentScore) {
         highScore += 1;
         if (!scoreSound.isPlaying()) {
+          scoreSound.rewind();
           scoreSound.play();
         }
       } else {
