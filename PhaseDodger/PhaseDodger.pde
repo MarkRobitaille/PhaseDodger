@@ -1,4 +1,6 @@
-// CONSTANTS
+import processing.sound.*;
+
+//CONSTANTS
 
 final float playerSpeed = 0.03;
 final boolean debug = false;
@@ -50,19 +52,29 @@ int gameOverStep;
 PFont font;
 PImage splashImg;
 
-//PImage alienImg;
 PImage[] enemyImgArray;
 PImage[] blueShip;
 PImage[] pinkShip;
 
-  //particle system testing
-  particleSystem playerExplosion;
-  PImage explosionImage;
+String scoreString[];
+SoundFile gameMusic;
+SoundFile deathSound;
+SoundFile gameOverSound;
+SoundFile menuMusic;
+// particle system testing
+particleSystem playerExplosion;
+PImage explosionImage;
 
- String scoreString[];
+
 void setup() {
-
- //alienImg = loadImage("data/enemy.png");
+  // Set initial window
+  size(800,800, P3D);
+  surface.setResizable(true); // Make it work maximized?
+  ortho(-1, 1, 1, -1);
+  hint(DISABLE_OPTIMIZED_STROKE);
+  smooth(4);
+  
+  // Load sprite assets
   enemyImgArray = new PImage[6];
   enemyImgArray[0] = loadImage("data/enemy.png");
   enemyImgArray[1] = loadImage("data/enemy2.png");
@@ -81,18 +93,16 @@ void setup() {
   pinkShip[2] = loadImage("data/playerpinkright.png");
   
   explosionImage = loadImage("data/explosion.png");
-  
-
+ 
+  // Load high score
   scoreString = loadStrings("highscore.txt");
    
-
-  size(800,800, P3D);
-  surface.setResizable(true); // Make it work maximized?
-  ortho(-1, 1, 1, -1);
-  hint(DISABLE_OPTIMIZED_STROKE);
-  smooth(4);
+  // Load music files
+  gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
+  menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
+  deathSound = new SoundFile(this, "ship-explosion.mp3");
   
-  // Game state variables
+  // Initialize game state variables
   gameMode = 1;
   phaseHold = false; // Default is swap phase with space
 
@@ -101,8 +111,6 @@ void setup() {
   currentScore = 0;
   lives = 3;
   level = 1;
-
-  //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
@@ -189,17 +197,12 @@ void draw() {
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
+        deathSound.play();
         deathTimer=millis();
         playerExplosion = new particleSystem(new PVector(playerTranslation.x,playerTranslation.y), explosionImage, 0.002f, 0.005f, 500, 750, 100, 0.15f, 0.5f);
       }
       
-      // Draw UI last
-      resetMatrix();
-      if (width>height) {
-        scale((float)height/(float)width, 1);
-      }else {
-        scale(1, (float)width/(float)height);
-      }
+      //// Draw UI last
       drawUI();
     } else if (deathStep == 0) {
       playerRotation+=0.2;
@@ -209,12 +212,6 @@ void draw() {
       stroke(0);
       drawPlayer();
       playerExplosion.drawMe();
-      resetMatrix();
-      if (width>height) {
-        scale((float)height/(float)width, 1);
-      }else {
-        scale(1, (float)width/(float)height);
-      }
       drawUI();
       if (deathTimer + 2000 < millis()) {
         if (lives-1 <= 0) {
@@ -239,11 +236,6 @@ void draw() {
     }
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
-  //  if (width>height) {
-  //  scale((float)height/(float)width, 1);
-  //}else {
-  //  scale(1, (float)width/(float)height);
-  //}
     scale(1,-1);
     fill(0);
     textFont(font, 20);
@@ -264,12 +256,21 @@ void draw() {
       line(-150, 210, textWidth("SWAP")-150, 210);
     }
     strokeWeight(1);
-  } else if (gameMode == 2) { // pause screen
-    noStroke();
-    gen.drawBlocks();
-    drawEnemies();
-    stroke(0);
-    drawPlayer();
+    
+    //music
+    if(gameMode == 1 && !menuMusic.isPlaying()){
+    //System.out.println("true");
+    menuMusic.loop();
+  }
+  
+  } else if (gameMode == 2) { // Pause screen
+    if (deathStep!=1) {
+      noStroke();
+      gen.drawBlocks();
+      drawEnemies();
+      stroke(0);
+      drawPlayer();
+    }
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
@@ -281,6 +282,22 @@ void draw() {
     } else {
       drawUI();
     }
+  }
+  
+  if (width>height) {
+    resetMatrix();
+    ortho(-1, 1, 1, -1);
+    scale((float)height/(float)width, 1);
+    fill(0,0,0);
+    rect(-5,-1,4,2);
+    rect(1,-1,4,2);
+  } else {
+    resetMatrix();
+    ortho(-1, 1, 1, -1);
+    scale(1, (float)width/(float)height);
+    fill(0,0,0);
+    rect(-1,1,2,4);
+    rect(-1,-5,2,4);
   }
 }
 
@@ -386,6 +403,10 @@ void keyPressed() {
       case 'p':
         gameMode = 0;
         break;
+      case 'q':
+        resetGame();
+        gameMusic.stop();
+        break;
       case ' ':
         gameMode = 0;
         break;
@@ -476,12 +497,16 @@ void updatePlayer() {
 
 void drawPlayer() {
   // Translate to player location, draw player, resetMatrix at the end
-  
   translate(playerTranslation.x, playerTranslation.y);
   rotate(playerRotation);
   scale(playerScale, playerScale);
   
   imageMode(CENTER);
+  
+  if (!playerAlive) {
+    tint(255, 0, 0);
+  }
+  
   if (playerPhase) { // (playerPhase && playerAlive) { // Then in else have red ship?
     if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
       image(blueShip[1], 0, 0, 2, 2);
@@ -500,11 +525,14 @@ void drawPlayer() {
     }
   }
   
-  //if(!playerAlive) {
-  //  fill(255,0,0);
-  //}
-  
+  noTint();
   resetMatrix();
+  
+  if (width>height) {
+    scale((float)height/(float)width, 1);
+  }else {
+    scale(1, (float)width/(float)height);
+  }
   strokeWeight(1);
   if (debug) {
     fill(0);
@@ -524,21 +552,20 @@ void resetAfterDeath() {
 
 public void changeLevel(){
   if(level < levelArray.length){
-  if(currentScore >= levelArray[level -1]){
-    gen.levelOver = true;
-  }
+    if(currentScore >= levelArray[level -1]){
+      gen.levelOver = true;
+    }
   }
   if(gen.nextLevel()){
     level++;
     gen.levelOver = false;
     gen = new blockGenerator(level+1, 1,-1) ;
-}
+  }
 }
 
 // ENEMY METHODS
 
 void addEnemy() {
-  
   // Find level value
   int levelValue = 0; // if less than 5 levels
   if (level>=5 && level<8) {
@@ -547,9 +574,7 @@ void addEnemy() {
     levelValue = 2;
   }
   
-  //System.out.println(levelValue);
-  
-  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()) {
+  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()&&!gen.levelOver) {
     PVector startLocation = new PVector((float)Math.random()*1.5-1.0,  1.25);
     int alienIndex = int(random(enemyImgArray.length));
     gameEnemies.add(new gameEnemy(startLocation, playerTranslation, enemyImgArray[alienIndex])); 
@@ -589,16 +614,20 @@ boolean checkEnemyCollisions(PVector playerPos, float playerRadius) {
 
 void drawUI() {
   ortho(-400,400,400,-400);
-  //if (width>height) {
-  //  scale((float)height/(float)width, 1);
-  //}else {
-  //  scale(1, (float)width/(float)height);
-  //}
-  scale(1, -1); //Flip it 
+  scale(1, -1); // Flip it 
   fill(0);
   textFont(font, 20);
   textAlign(LEFT);
-
+  
+  if(gameMode == 0 && !gameMusic.isPlaying()){
+    menuMusic.stop();
+    //gameOverMusic end
+    gameMusic.loop();
+  }else if(gameMode == 4){ //gameOverMusic
+    gameMusic.stop();
+  }
+    
+  
   if (gameMode == 0 || gameMode == 2 || (gameMode == 4 && gameOverStep == 0)) {
     //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
     String hsString = new Integer(highScore).toString(); 
@@ -634,16 +663,12 @@ void drawUI() {
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
       for (int i = 0; i < lives-1; i++) {
         image(lifeImage, (-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), 330, 20, 20);
-        
-        //triangle((-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), -340, //coords for point one (top)
-        //-totalLength/2 + (i*(padding + shipSize)), -320, //coords for bottom left
-        //(-totalLength/2 + shipSize) + (i*(padding + shipSize)),-320); //coords for bottom right
       }
     }
     
     scale(1, -1);
 
-    // If you want 
+    // If you want triangles instead of ship icons
 
     //if (playerPhase) {
     // fill(bluePhase);
@@ -666,12 +691,16 @@ void drawUI() {
     fill(0);
     
     if (deathStep==1 && lives!=2) {
-      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), -100);
     } else if (deathStep==1) {
-      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), -100);
     } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
+    
+     if (gameMode == 2) {
+       text("PRESS Q TO QUIT", floor(-textWidth("PRESS Q TO QUIT")/2 + 0.5), 200);
+     }
   } else { //GAME OVER
     fill(255, 0, 0);
     text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);

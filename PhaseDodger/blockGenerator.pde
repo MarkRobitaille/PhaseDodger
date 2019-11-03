@@ -2,14 +2,12 @@
 class blockGenerator{
     float top;
     ArrayList<gameBlock> blockList;
-    ArrayList<ArrayList<gameBlock>> largeList;
     boolean levelOver = false;
     float bottom;
     float[] lanes;
     float numLanes;
     int blockScore;
 public blockGenerator(float numLanes, float top, float bottom){
-    //largeList = new ArrayList();
     this.lanes = new float[int(numLanes)];
      blockList = new ArrayList();
 
@@ -27,7 +25,6 @@ public blockGenerator(float numLanes, float top, float bottom){
 }
 public boolean nextLevel(){
   return levelOver && blockList.size() <=0;
-   
   }
   
  
@@ -45,10 +42,21 @@ public void run(float speed){
   cleanUpArrayList();
 }
 public void fillArray(){
+  if(numLanes<=3){
+  if(blockList.size()< numLanes*5){
+      this.generate();
+      }
   
+  }else if(numLanes>3 && numLanes <= 6){
+  if(blockList.size()< numLanes*7){
+      this.generate();
+      }
+  }else if(numLanes>5){
   if(blockList.size()< numLanes*10){
       this.generate();
+        }
   }
+  
 }
 
 private void generate(){
