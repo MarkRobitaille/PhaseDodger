@@ -402,6 +402,10 @@ void keyPressed() {
       case 'p':
         gameMode = 0;
         break;
+      case 'q':
+        resetGame();
+        gameMusic.stop();
+        break;
       case ' ':
         gameMode = 0;
         break;
@@ -692,6 +696,10 @@ void drawUI() {
     } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
+    
+     if (gameMode == 2) {
+       text("PRESS Q TO QUIT", floor(-textWidth("PRESS Q TO QUIT")/2 + 0.5), 200);
+     }
   } else { //GAME OVER
     fill(255, 0, 0);
     text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
