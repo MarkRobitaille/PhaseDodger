@@ -17,7 +17,7 @@ public particle(PVector pos, PVector vel, int lifetime, PImage image) {
 }
 
 
-public drawMe(int dt) {
+public void drawMe(int dt) {
 	pos.x += vel.x * dt / 16;
 	pos.y += vel.y * dt / 16;
 	age += dt;
