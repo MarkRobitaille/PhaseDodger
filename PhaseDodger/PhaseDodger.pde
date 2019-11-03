@@ -15,7 +15,7 @@ color pinkPhase = color(255,192,203);
 int gameMode; // For now default to right in the game, change once title screen is made
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
-float [] gameSpeedArr = {0.01,0.013,0.014,0.015,0.015,0.016,0.016,0.016,0.017};
+float [] gameSpeedArr = {0.01,0.013,0.014,0.0145,0.0152,0.016,0.016,0.016,0.017};
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
 
@@ -199,7 +199,7 @@ void draw() {
       if (!playerAlive) {
         deathSound.play();
         deathTimer=millis();
-        playerExplosion = new particleSystem(new PVector(playerTranslation.x,playerTranslation.y), explosionImage, 0.002f, 0.005f, 500, 750, 100, 0.15f, 0.5f);
+        playerExplosion = new particleSystem(new PVector(playerTranslation.x,playerTranslation.y), explosionImage, 0.025f, 0.025f, 1000, 1000, 10, 0.2f, 1f);
       }
       
       //// Draw UI last
@@ -768,8 +768,6 @@ void drawUI() {
 void resetGame() {
   gen = new blockGenerator(2, 1, -1);
   gameMode = 1; 
-
-  //testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
 
   currentScore = 0;
   lives = 3;
