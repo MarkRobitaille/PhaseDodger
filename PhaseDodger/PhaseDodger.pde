@@ -72,7 +72,7 @@ void setup() {
   surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
-  smooth(4);
+  smooth(1);
   
   // Load sprite assets
   enemyImgArray = new PImage[6];
