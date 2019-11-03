@@ -169,6 +169,7 @@ void draw() {
     textAlign(LEFT);
     image(splashImg, -300, -200);
 
+    text("HIGHSCORE: " + highScore, floor(-textWidth("HIGHSCORE" + highScore)/2 + 0.5), -360);
     text("PHASE TYPE", floor(-textWidth("PHASE TYPE")/2 + 0.5), 100);
     text("SWAP", -150, 200);
     text("HOLD", 150-textWidth("HOLD"), 200);
@@ -184,6 +185,7 @@ void draw() {
   } else if (gameMode == 2) { // pause screen
     noStroke();
     gen.drawBlocks();
+    drawEnemies();
     stroke(0);
     drawPlayer();
     drawUI();
@@ -191,6 +193,7 @@ void draw() {
     if (gameOverStep == 0) {
       noStroke();
       gen.drawBlocks();
+      drawEnemies();
       stroke(0);
       drawPlayer();
       drawUI();
@@ -315,7 +318,7 @@ void keyPressed() {
     if (gameOverStep == 4) { //if we're currently incrementing the score onscreen
       highScore = currentScore;
       gameOverStep += 1;
-    } else if (gameOverStep >= 5 || (gameOverStep >= 3 && !newHighScore)) { //if we're past the score going up stage
+    } else if (gameOverStep >= 5 || (gameOverStep >= 2 && !newHighScore)) { //if we're past the score going up stage
       resetGame();
     } else { 
       gameOverStep += 1;
@@ -537,20 +540,20 @@ void drawUI() {
     fill(255, 0, 0);
     text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
     fill(0);
-    if (timer + 2000 < millis()) {
+    if (gameOverStep == 1 && timer + 1000 < millis()) {
       gameOverStep += 1;
       timer = millis();
     }
     if (gameOverStep >= 2) {
       text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
-      if (timer + 1000 < millis() && newHighScore) {
+      if (gameOverStep == 2 && timer + 1000 < millis() && newHighScore) {
         gameOverStep +=1;
         timer = millis();
       }
     }
     if (gameOverStep >= 3 && newHighScore) {
       text("NEW HIGHSCORE!", floor(-textWidth("NEW HIGHSCORE!")/2 + 0.5), 100);
-      if (timer + 1000 < millis()) {
+      if (gameOverStep == 3 && timer + 1000 < millis()) {
         gameOverStep += 1;
         timer = millis();
       }
@@ -583,7 +586,6 @@ void resetGame() {
   level = 1;
 
   newHighScore = false;
-  
   gameOverStep = 0;
   
   // Player variables
