@@ -241,19 +241,20 @@ void draw() {
     textFont(font, 20);
     textAlign(LEFT);
     imageMode(CORNER);
-    image(splashImg, -300, -200);
+    image(splashImg, -300, -250);
 
     text("HIGHSCORE: " + highScore, floor(-textWidth("HIGHSCORE" + highScore)/2 + 0.5), -360);
-    text("PHASE TYPE", floor(-textWidth("PHASE TYPE")/2 + 0.5), 100);
-    text("SWAP", -150, 200);
-    text("HOLD", 150-textWidth("HOLD"), 200);
-    text("PRESS SPACE TO START", floor(-textWidth("PRESS SPACE TO START")/2 + 0.5), 300);
+    text("PHASE TYPE", floor(-textWidth("PHASE TYPE")/2 + 0.5), 0);
+    text("SWAP", -150, 100);
+    text("HOLD", 150-textWidth("HOLD"), 100);
+    text("PRESS SPACE TO START", floor(-textWidth("PRESS SPACE TO START")/2 + 0.5), 200);
+    text("PRESS I FOR INSTRUCTIONS", floor(-textWidth("PRESS I FOR INSTRUCTIONS")/2 + 0.5), 300);
 
     strokeWeight(2);
     if (phaseHold) {
-      line(150-textWidth("HOLD"), 210, 150, 210);
+      line(150-textWidth("HOLD"), 110, 150, 110);
     } else {
-      line(-150, 210, textWidth("SWAP")-150, 210);
+      line(-150, 110, textWidth("SWAP")-150, 110);
     }
     strokeWeight(1);
     
@@ -282,6 +283,19 @@ void draw() {
     } else {
       drawUI();
     }
+  } else if (gameMode ==5) {
+    ortho(-400,400,400,-400);
+    scale(1,-1);
+    fill(0);
+    textFont(font, 20);
+    textAlign(LEFT);
+    
+    text("PRESS A/D OR LEFT/RIGHT KEYS TO MOVE", floor(-textWidth("PRESS A/D OR LEFT/RIGHT KEYS TO MOVE")/2 + 0.5), -300);
+    text("PRESS OR HOLD SPACE BAR TO SWAP SHIP COLOR",floor(-textWidth("PRESS OR HOLD SPACE BAR TO SWAP SHIP COLOR")/2 + 0.5), -200);
+    text("PRESS P TO PAUSE THE GAME",floor(-textWidth("PRESS P TO PAUSE THE GAME")/2 + 0.5), -100);
+    text("MATCH PATH AND SHIP COLOR TO SURVIVE", floor(-textWidth("MATCH PATH AND SHIP COLOR TO SURVIVE")/2 + 0.5), 0);
+    text("AVOID ENEMY ALIENS", floor(-textWidth("AVOID ENEMY ALIENS")/2 + 0.5), 100);
+    text("PRESS SPACE TO RETURN", floor(-textWidth("PRESS SPACE TO RETURN")/2 + 0.5), 300);
   }
   
   if (width>height) {
@@ -396,6 +410,9 @@ void keyPressed() {
         case ' ':
           gameMode = 0;
           break;
+        case 'i':
+          gameMode = 5;
+          break;
       }
     }
   } else if (gameMode == 2) { //paused
@@ -420,6 +437,10 @@ void keyPressed() {
       resetGame();
     } else { 
       gameOverStep += 1;
+    }
+  } else if (gameMode == 5) {
+    if (key == ' ') {
+      gameMode = 1;
     }
   }
 }
