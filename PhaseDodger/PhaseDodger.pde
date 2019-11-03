@@ -115,7 +115,7 @@ void draw() {
   if (gameMode == 0) { // Playing game
     if (playerAlive) {
       noStroke();
-      gen.run(0.01);
+      gen.run(0.01, playerPhase);
       currentScore += gen.getBlockScore();
       changeLevel();
       
@@ -161,7 +161,7 @@ void draw() {
     } else if (deathStep == 0) {
       playerRotation+=0.2;
       noStroke();
-      gen.drawBlocks();
+      gen.drawBlocks(playerPhase);
       drawEnemies();
       stroke(0);
       drawPlayer();
@@ -211,7 +211,7 @@ void draw() {
     strokeWeight(1);
   } else if (gameMode == 2) { // pause screen
     noStroke();
-    gen.drawBlocks();
+    gen.drawBlocks(playerPhase);
     drawEnemies();
     stroke(0);
     drawPlayer();

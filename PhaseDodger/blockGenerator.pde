@@ -31,17 +31,17 @@ public boolean nextLevel(){
   }
   
  
-public void drawBlocks(){
+public void drawBlocks(boolean playerPhase){
     for (int i = 0; i< blockList.size(); i++) {
-        blockList.get(i).drawMe();
+        blockList.get(i).drawMe(playerPhase);
     }
 }
-public void run(float speed){
+public void run(float speed, boolean playerPhase){
   if(!levelOver){
-  fillArray();
+    fillArray();
   }
-  drawBlocks();
   updateBlockPos(speed);
+  drawBlocks(playerPhase);
   cleanUpArrayList();
 }
 public void fillArray(){

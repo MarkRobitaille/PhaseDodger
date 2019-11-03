@@ -1,7 +1,9 @@
 
 class gameBlock{
  color blue = color(135,206,250);
+ color fadedBlue = color(191, 231, 255);
  color pink = color(255,192,203);
+ color fadedPink = color(255, 209, 217);
 PVector pos; 
 float w;
 float h;
@@ -15,15 +17,19 @@ this.pos= pos; this.w = size; this.trueBlue = blockColor; this.h = size; empty =
 public gameBlock (PVector pos, float size, boolean blockColor, boolean empty){
 this.pos= pos; this.w = size; this.trueBlue = blockColor; this.h = size; this.empty = empty;
 }
-public void drawMe(){
+public void drawMe(boolean playerPhase){
     
     if(!empty){
     float xoff = w/2;
     float yoff = h/2;
     noStroke();
-    if(trueBlue){
+    if(trueBlue && playerPhase){
+        fill(this.fadedBlue);
+    } else if (trueBlue) {
         fill(this.blue);
-    }else{
+    } else if (!playerPhase)  {
+        fill(this.fadedPink);
+    } else{
         fill(this.pink);
     }
      beginShape(QUADS);
