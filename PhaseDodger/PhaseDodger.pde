@@ -1,4 +1,9 @@
-// CONSTANTS
+import processing.sound.*;
+
+
+
+
+//CONSTANTS
 
 final float playerSpeed = 0.03;
 final boolean debug = false;
@@ -49,12 +54,16 @@ boolean newHighScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
-//PImage alienImg;
+
 PImage[] enemyImgArray;
 PImage[] blueShip;
 PImage[] pinkShip;
 
- String scoreString[];
+String scoreString[];
+SoundFile gameMusic;
+SoundFile deathSound;
+SoundFile gameOverSound;
+SoundFile menuMusic;
 void setup() {
 
  //alienImg = loadImage("data/enemy.png");
@@ -77,7 +86,8 @@ void setup() {
   
   scoreString = loadStrings("highscore.txt");
    
-
+  gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
+  menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   size(800,800, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
@@ -228,12 +238,21 @@ void draw() {
       line(-150, 210, textWidth("SWAP")-150, 210);
     }
     strokeWeight(1);
+    
+    //music
+    if(gameMode == 1 && !menuMusic.isPlaying()){
+    //System.out.println("true");
+    menuMusic.loop();
+  }
+  
   } else if (gameMode == 2) { // pause screen
     noStroke();
     gen.drawBlocks();
     drawEnemies();
     stroke(0);
     drawPlayer();
+  
+    
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
@@ -557,7 +576,16 @@ void drawUI() {
   fill(0);
   textFont(font, 20);
   textAlign(LEFT);
-
+  
+  if(gameMode == 0 && !gameMusic.isPlaying()){
+    menuMusic.stop();
+    //gameOverMusic end
+    gameMusic.loop();
+  }else if(gameMode == 4){ //gameOverMusic
+    gameMusic.stop();
+  }
+    
+  
   if (gameMode == 0 || gameMode == 2 || (gameMode == 4 && gameOverStep == 0)) {
     //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
     String hsString = new Integer(highScore).toString(); 
