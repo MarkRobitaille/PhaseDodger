@@ -43,8 +43,7 @@ public class gameEnemy {
       fill(0);
       ellipse(current.x, current.y, enemyHitBox, enemyHitBox);
     }
-    stroke(255,0,0);
-    line(start.x, start.y, goal.x, goal.y);
+    
     stroke(0);
   }
   
