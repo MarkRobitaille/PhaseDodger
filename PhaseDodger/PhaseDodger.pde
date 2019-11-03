@@ -68,7 +68,7 @@ PImage explosionImage;
 
 void setup() {
   // Set initial window
-  size(800,800, P3D);
+  size(600,600, P3D);
   surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
@@ -585,7 +585,7 @@ void addEnemy() {
 void updateEnemies() {
   for (int i=0; i<gameEnemies.size(); i++) {
     gameEnemy currEnemy = gameEnemies.get(i);
-    currEnemy.update(0.0065);
+    currEnemy.update(0.0075);
     if (currEnemy.isOffScreen() || currEnemy.hitPlayer) {
       gameEnemies.remove(currEnemy);
       currentScore+=20;
