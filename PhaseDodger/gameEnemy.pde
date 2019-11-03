@@ -6,7 +6,7 @@ public class gameEnemy {
   PVector goal;
   float progress;
   boolean hitPlayer;
-  
+  PImage img;
   
   public gameEnemy(PVector startLocation, PVector playerLocation) {
     start = startLocation;
@@ -36,9 +36,20 @@ public class gameEnemy {
   }
   
   public void drawMe() {
+    img = loadImage("data/enemy.png");
     stroke(116,71,105);
-    fill(167,102,150);
-    ellipse(current.x, current.y, enemySize, enemySize);
+    //fill(167,102,150);
+    //aPShape enemy = createShape(ELLIPSE,current.x, current.y, enemySize, enemySize);
+    //img
+    //enemy.getTessellation();
+    //enemy.setTexture(img);
+
+    //shape(enemy);
+    noSmooth();
+    imageMode(CENTER);
+    image(img, current.x, current.y,enemySize, enemySize);
+    smooth(3);
+    //ellipse(current.x, current.y, enemySize, enemySize);
     stroke(0);
   }
   
