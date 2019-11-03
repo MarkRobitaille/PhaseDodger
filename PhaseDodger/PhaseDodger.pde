@@ -49,23 +49,30 @@ PFont font;
 PImage splashImg;
 //PImage alienImg;
 PImage[] enemyImgArray;
-PImage blueShip;
-PImage pinkShip;
+PImage[] blueShip;
+PImage[] pinkShip;
 
  String scoreString[];
 void setup() {
 
  //alienImg = loadImage("data/enemy.png");
-enemyImgArray = new PImage[6];
-enemyImgArray[0] = loadImage("data/enemy.png");
-enemyImgArray[1] = loadImage("data/enemy2.png");
-enemyImgArray[2] = loadImage("data/enemy3.png");
-enemyImgArray[3] = loadImage("data/enemy4.png");
-enemyImgArray[4] = loadImage("data/enemy5.png");
-enemyImgArray[5] = loadImage("data/enemy6.png");
+  enemyImgArray = new PImage[6];
+  enemyImgArray[0] = loadImage("data/enemy.png");
+  enemyImgArray[1] = loadImage("data/enemy2.png");
+  enemyImgArray[2] = loadImage("data/enemy3.png");
+  enemyImgArray[3] = loadImage("data/enemy4.png");
+  enemyImgArray[4] = loadImage("data/enemy5.png");
+  enemyImgArray[5] = loadImage("data/enemy6.png");
 
-  blueShip = loadImage("data/playerblue.png");
-  pinkShip = loadImage("data/playerpink.png");
+  blueShip = new PImage[3];
+  blueShip[0] = loadImage("data/playerblueleft.png");
+  blueShip[1] = loadImage("data/playerblue.png");
+  blueShip[2] = loadImage("data/playerblueright.png");
+  pinkShip = new PImage[3];
+  pinkShip[0] = loadImage("data/playerpinkleft.png");
+  pinkShip[1] = loadImage("data/playerpink.png");
+  pinkShip[2] = loadImage("data/playerpinkright.png");
+  
   scoreString = loadStrings("highscore.txt");
    
 
@@ -434,15 +441,27 @@ void drawPlayer() {
   scale(playerScale, playerScale);
   
   imageMode(CENTER);
-  if (playerPhase) {
-    image(blueShip, 0, 0, 2, 2);
+  if (playerPhase) { // (playerPhase && playerAlive) { // Then in else have red ship?
+    if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
+      image(blueShip[1], 0, 0, 2, 2);
+    } else if (moveLeft) { // Moving left
+      image(blueShip[0], 0, 0, 2, 2);
+    } else { // Moving right
+      image(blueShip[2], 0, 0, 2, 2);
+    }
   } else {
-    image(pinkShip, 0, 0, 2, 2);
+    if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
+      image(pinkShip[1], 0, 0, 2, 2);
+    } else if (moveLeft) { // Moving left
+      image(pinkShip[0], 0, 0, 2, 2);
+    } else { // Moving right
+      image(pinkShip[2], 0, 0, 2, 2);
+    }
   }
   
-  if(!playerAlive) {
-    fill(255,0,0);
-  }
+  //if(!playerAlive) {
+  //  fill(255,0,0);
+  //}
   
   resetMatrix();
   strokeWeight(1);
@@ -450,7 +469,6 @@ void drawPlayer() {
     fill(0);
     ellipse(hitboxPos.x, hitboxPos.y, hitboxRadius*2, hitboxRadius*2);
   }
-  
 }
 
 void resetAfterDeath() {
@@ -553,23 +571,50 @@ void drawUI() {
 
     text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
 
+    PImage lifeImage;
     if (playerPhase) {
-     fill(bluePhase);
+     lifeImage = blueShip[1];
     } else {
-     fill(pinkPhase);
+     lifeImage = pinkShip[1];
     }
-
-    int triWidth = 20;
-    int triHeight = 20;
+    
+    int shipSize = 20;
     int padding = 10;
-    int totalLength = ((lives-1) * (triWidth+padding)) - padding;
+    
+    scale(1, -1);
+    
+    int totalLength = ((lives-1) * (shipSize+padding)) - padding;
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
       for (int i = 0; i < lives-1; i++) {
-        triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
-        -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
-        (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+        image(lifeImage, (-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), 330, 20, 20);
+        
+        //triangle((-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), -340, //coords for point one (top)
+        //-totalLength/2 + (i*(padding + shipSize)), -320, //coords for bottom left
+        //(-totalLength/2 + shipSize) + (i*(padding + shipSize)),-320); //coords for bottom right
       }
     }
+    
+    scale(1, -1);
+
+    // If you want 
+
+    //if (playerPhase) {
+    // fill(bluePhase);
+    //} else {
+    // fill(pinkPhase);
+    //}
+
+    //int triWidth = 20;
+    //int triHeight = 20;
+    //int padding = 10;
+    //int totalLength = ((lives-1) * (triWidth+padding)) - padding;
+    //if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
+    //  for (int i = 0; i < lives-1; i++) {
+    //    triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
+    //    -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
+    //    (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+    //  }
+    //}
 
     fill(0);
     
