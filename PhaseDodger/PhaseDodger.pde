@@ -1,7 +1,7 @@
 // CONSTANTS
 
 final float playerSpeed = 0.03;
-final boolean debug = true;
+final boolean debug = false;
 
 // Colors
 color bluePhase = color(135,206,250);
@@ -36,6 +36,11 @@ boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
 
+// Player death
+int deathTimer;
+int deathStep;
+float playerRotation;
+
 // UI variables
 int highScore;
 int currentScore;
@@ -69,7 +74,7 @@ void setup() {
   ortho(-1, 1, 1, -1);
   
   // Game state variables
-  gameMode = 1; // CHANGE TO 1 (TITLE SCREEN) ONCE IMPLEMENTED
+  gameMode = 1;
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
@@ -99,6 +104,10 @@ void setup() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  deathTimer = 0;
+  deathStep = 0;
+  playerRotation = 0.0;
+  
   
   // Enemy variables
   gameEnemies = new ArrayList();
@@ -110,58 +119,85 @@ void draw() {
   background(255,255,255);
   
   if (gameMode == 0) { // Playing game
-    gen.run(0.01);
-    currentScore += gen.getBlockScore();
-    changeLevel();
-    updatePlayer();
-
-    addEnemy();
-
-    
-    updateEnemies();
-    
-    // CHECK FOR COLLISIONS
-    
-
-    // Find player's hitbox details (hitbox is circle) 
-    PVector hitboxPos = new PVector();
-    hitboxPos = playerTranslation.copy();
-    hitboxPos.y -= 0.025;
-    float hitboxRadius = playerScale/2;
-    
-    boolean hit = false; 
-    
-    // Check for collisions against enemies
-    hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
-
-    // Check for collisions against blocks
-    for (int i=0; i<gen.blockList.size() && !hit; i++) {
-      gameBlock currBlock = gen.blockList.get(i);
-      hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
+    if (playerAlive) {
+      noStroke();
+      gen.run(0.01);
+      currentScore += gen.getBlockScore();
+      changeLevel();
+      updatePlayer();
+  
+      addEnemy();
+  
+      
+      updateEnemies();
+      
+      // CHECK FOR COLLISIONS
+      
+  
+      // Find player's hitbox details (hitbox is circle) 
+      PVector hitboxPos = new PVector();
+      hitboxPos = playerTranslation.copy();
+      hitboxPos.y -= 0.025;
+      float hitboxRadius = playerScale/2;
+      
+      boolean hit = false; 
+      
+      // Check for collisions against enemies
+      hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
+  
+      // Check for collisions against blocks
+      for (int i=0; i<gen.blockList.size() && !hit; i++) {
+        gameBlock currBlock = gen.blockList.get(i);
+        hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
+      }
+      
+      playerAlive = !hit;
+      
+      // Draw things here
+      drawEnemies();
+      
+      stroke(0);
+      drawPlayer();
+      
+      // If player is dead, pause block movement, player turns red, lose life, start again?
+      if (!playerAlive) {
+        deathTimer=millis();
+      }
+      
+      // Draw UI last
+      drawUI();
+    } else if (deathStep == 0) {
+      playerRotation+=0.2;
+      noStroke();
+      gen.drawBlocks();
+      drawEnemies();
+      stroke(0);
+      drawPlayer();
+      drawUI();
+      if (deathTimer + 2000 < millis()) {
+        deathTimer=millis();
+        deathStep++;
+      }
+    } else if (deathStep == 1) {
+      //noStroke();
+      //gen.drawBlocks();
+      //drawEnemies();
+      //stroke(0);
+      //drawPlayer();
+      drawUI();
+      if (deathTimer + 4000 < millis()) {
+        playerRotation=0.0;
+        deathTimer=0;
+        lives--;
+        playerAlive=true;
+        gen.clearBlocks();
+        if (lives <= 0) {
+          gameMode = 4;
+          timer = millis();
+          newHighScore = currentScore > highScore;
+      }
+      } 
     }
-    
-    playerAlive = !hit;
-    
-    // Draw things here
-    drawEnemies();
-    
-    stroke(0);
-    drawPlayer();
-    
-    // If player is dead, pause block movement, player turns red, lose life, start again?
-    if (lives <= 0) {
-      gameMode = 4;
-      timer = millis();
-      newHighScore = currentScore > highScore;
-    }
-    
-    // Draw UI last
-    
-    
-    // Update score (count and remove blocks off screen)
-    
-    drawUI();
-  noStroke();
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
     scale(1,-1);
@@ -192,6 +228,7 @@ void draw() {
     if (gameOverStep == 0) {
       noStroke();
       gen.drawBlocks();
+      drawEnemies();
       stroke(0);
       drawPlayer();
       drawUI();
@@ -393,7 +430,9 @@ void updatePlayer() {
 
 void drawPlayer() {
   // Translate to player location, draw player, resetMatrix at the end
+  
   translate(playerTranslation.x, playerTranslation.y);
+  rotate(playerRotation);
   scale(playerScale, playerScale);
   strokeWeight(1/playerScale);
   if (playerPhase) {

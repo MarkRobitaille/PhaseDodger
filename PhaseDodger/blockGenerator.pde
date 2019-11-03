@@ -109,4 +109,8 @@ public int getBlockScore(){
   blockScore = 0;
   return out;
 }
+
+  public void clearBlocks() {
+    blockList.clear();
+  }
 }
