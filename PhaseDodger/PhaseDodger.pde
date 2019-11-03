@@ -62,8 +62,9 @@ SoundFile deathSound;
 SoundFile gameOverSound;
 SoundFile menuMusic;
 // particle system testing
-particleSystem testSystem;
-PImage testParticle;
+particleSystem playerExplosion;
+PImage explosionImage;
+
 
 void setup() {
   // Set initial window
@@ -91,10 +92,8 @@ void setup() {
   pinkShip[1] = loadImage("data/playerpink.png");
   pinkShip[2] = loadImage("data/playerpinkright.png");
   
-  // Initialize particle system
-  testParticle = loadImage("data/explosion.png");
-  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
-
+  explosionImage = loadImage("data/explosion.png");
+ 
   // Load high score
   scoreString = loadStrings("highscore.txt");
    
@@ -195,13 +194,12 @@ void draw() {
       
       stroke(0);
       drawPlayer();
-
-      //testSystem.drawMe();
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
         deathSound.play();
         deathTimer=millis();
+        playerExplosion = new particleSystem(new PVector(playerTranslation.x,playerTranslation.y), explosionImage, 0.002f, 0.005f, 500, 750, 100, 0.15f, 0.5f);
       }
       
       //// Draw UI last
@@ -213,6 +211,7 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      playerExplosion.drawMe();
       drawUI();
       if (deathTimer + 2000 < millis()) {
         if (lives-1 <= 0) {
@@ -749,7 +748,7 @@ void resetGame() {
   gen = new blockGenerator(2, 1, -1);
   gameMode = 1; 
 
-  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
+  //testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
 
   currentScore = 0;
   lives = 3;
