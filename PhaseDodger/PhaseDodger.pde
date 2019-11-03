@@ -1,5 +1,5 @@
-import processing.sound.*;
 import ddf.minim.*;
+
 //CONSTANTS
 
 final float playerSpeed = 0.03;
@@ -402,9 +402,6 @@ void keyPressed() {
           break;
         case 'p':
           gameMode = 2;
-          break;
-        case 'm':
-          lives -= 1;
           break;
       }
     }
