@@ -96,13 +96,12 @@ public void updateBlockPos(float speed){
 public void cleanUpArrayList(){
     for (int i = 0; i < blockList.size(); i++) {
            if(blockList.get(i).pos.y+ blockList.get(i).h/2  <= bottom){ 
+             if(!blockList.get(i).empty){
+             blockScore += 10;
+             }
              blockList.remove(i);
              i--;
-             blockScore += 10;
            }
-           
-             
-
     }
 }
 public int getBlockScore(){

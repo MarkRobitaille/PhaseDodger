@@ -21,6 +21,10 @@ ArrayList<gameEnemy> gameEnemies;
 
 
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
+blockGenerator gen;
+
+//int[] levelArray = {100, 500, 1000};
+
 // Player variables
 PVector[] playerPiece;
 PVector playerTranslation;
@@ -43,8 +47,21 @@ int gameOverStep;
 PFont font;
 PImage splashImg;
 
-blockGenerator gen;
+//File I/0
+String highscoreFile = "highscore.txt";
+BufferedReader highscoreReader;
+PrintWriter highscoreWriter;
 void setup() {
+  highscoreReader = createReader(highscoreFile);
+  highscoreWriter = createWriter(highscoreFile);
+  String scoreString;
+  try{
+  scoreString = highscoreReader.readLine();
+  }catch (IOException e) {
+    e.printStackTrace();
+    scoreString = null;
+  }
+ 
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
@@ -55,7 +72,7 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = 100;
+  highScore = int(scoreString);
   currentScore = 0;
   lives = 3;
   level = 1;
@@ -193,11 +210,13 @@ boolean checkHitRect(PVector playerPos, float playerRadius, PVector rectPos, flo
   float distX = Math.abs(playerPos.x - rectPos.x);
   float distY = Math.abs(playerPos.y - rectPos.y);
   if(empty){
+    //block is empty
     hit =false;
   }else if (distX > (playerRadius + rectWidth/2) || distY > (playerRadius + rectHeight/2)) {
     // Player is safely out of range
     hit = false;
   }else if(playerPhase == trueBlue){
+    //player matches the color
     hit = false;
   }
  
@@ -401,8 +420,10 @@ void drawPlayer() {
   }
 }
 public void changeLevel(){
+  if(level < levelArray.length){
   if(currentScore >= levelArray[level -1]){
     gen.levelOver = true;
+  }
   }
   if(gen.nextLevel()){
     level++;
