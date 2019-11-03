@@ -64,11 +64,10 @@ SoundFile gameMusic;
 SoundFile deathSound;
 SoundFile gameOverSound;
 SoundFile menuMusic;
-  //particle system testing
-  particleSystem testSystem;
-  PImage testParticle;
+// particle system testing
+particleSystem testSystem;
+PImage testParticle;
 
- String scoreString[];
 void setup() {
   enemyImgArray = new PImage[6];
   enemyImgArray[0] = loadImage("data/enemy.png");
