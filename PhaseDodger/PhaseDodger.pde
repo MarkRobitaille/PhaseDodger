@@ -77,9 +77,10 @@ void setup() {
    
 
   size(800,800, P3D);
-  //surface.setResizable(true); // Make it work maximized?
+  surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
+  smooth(4);
   
   // Game state variables
   gameMode = 1;
@@ -126,7 +127,15 @@ void setup() {
 void draw() {
   resetMatrix();
   ortho(-1, 1, 1, -1);
-  background(255,255,255);
+  background(0,0,0);
+  if (width>height) {
+    scale((float)height/(float)width, 1);
+  }else {
+    scale(1, (float)width/(float)height);
+  }
+  
+  fill(255,255,255);
+  rect(-1, -1, 2, 2);
   
   if (gameMode == 0) { // Playing game
     if (playerAlive) {
@@ -171,6 +180,12 @@ void draw() {
       }
       
       // Draw UI last
+      resetMatrix();
+      if (width>height) {
+        scale((float)height/(float)width, 1);
+      }else {
+        scale(1, (float)width/(float)height);
+      }
       drawUI();
     } else if (deathStep == 0) {
       playerRotation+=0.2;
@@ -179,6 +194,12 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      resetMatrix();
+      if (width>height) {
+        scale((float)height/(float)width, 1);
+      }else {
+        scale(1, (float)width/(float)height);
+      }
       drawUI();
       if (deathTimer + 2000 < millis()) {
         if (lives-1 <= 0) {
@@ -203,6 +224,11 @@ void draw() {
     }
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
+  //  if (width>height) {
+  //  scale((float)height/(float)width, 1);
+  //}else {
+  //  scale(1, (float)width/(float)height);
+  //}
     scale(1,-1);
     fill(0);
     textFont(font, 20);
@@ -547,6 +573,11 @@ boolean checkEnemyCollisions(PVector playerPos, float playerRadius) {
 
 void drawUI() {
   ortho(-400,400,400,-400);
+  //if (width>height) {
+  //  scale((float)height/(float)width, 1);
+  //}else {
+  //  scale(1, (float)width/(float)height);
+  //}
   scale(1, -1); //Flip it 
   fill(0);
   textFont(font, 20);
