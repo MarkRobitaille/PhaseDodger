@@ -49,10 +49,15 @@ boolean newHighScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
+
 //PImage alienImg;
 PImage[] enemyImgArray;
 PImage[] blueShip;
 PImage[] pinkShip;
+
+  //particle system testing
+  particleSystem testSystem;
+  PImage testParticle;
 
  String scoreString[];
 void setup() {
@@ -73,6 +78,9 @@ void setup() {
   pinkShip[1] = loadImage("data/playerpink.png");
   pinkShip[2] = loadImage("data/playerpinkright.png");
   
+  testParticle = loadImage("data/explosion.png");
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
+
   scoreString = loadStrings("highscore.txt");
 
   size(800,800, P3D);
@@ -175,6 +183,8 @@ void draw() {
       
       stroke(0);
       drawPlayer();
+
+      //testSystem.drawMe();
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
@@ -693,6 +703,8 @@ void drawUI() {
 void resetGame() {
   gen = new blockGenerator(2, 1, -1);
   gameMode = 1; 
+
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
 
   currentScore = 0;
   lives = 3;
