@@ -48,26 +48,22 @@ int lives;
 int level;
 int timer;
 boolean newHighScore;
-boolean countingScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
 
 //File I/0
 String highscoreFile = "highscore.txt";
-BufferedReader highscoreReader;
-PrintWriter highscoreWriter;
+//BufferedReader highscoreReader;
+//PrintWriter highscoreWriter
+ String scoreString[];
 void setup() {
-  highscoreReader = createReader(highscoreFile);
-  highscoreWriter = createWriter(highscoreFile);
-  String scoreString;
-  try{
-  scoreString = highscoreReader.readLine();
-  }catch (IOException e) {
-    e.printStackTrace();
-    scoreString = null;
-  }
+ // highscoreReader = createReader(highscoreFile);
+  //highscoreWriter = createWriter(highscoreFile);
  
+
+  scoreString = loadStrings("highscore.txt");
+   
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
@@ -78,7 +74,7 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = int(scoreString);
+  highScore = int(scoreString[0]);
   currentScore = 0;
   lives = 3;
   level = 1;
@@ -86,7 +82,6 @@ void setup() {
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
-  countingScore = false;
   gameOverStep = 0;
   
   // Player variables
@@ -175,8 +170,19 @@ void draw() {
       drawPlayer();
       drawUI();
       if (deathTimer + 2000 < millis()) {
-        deathTimer=millis();
-        deathStep++;
+        if (lives-1 <= 0) {
+          lives--;
+          gameMode = 4;
+          timer = millis();
+          newHighScore = currentScore > highScore;
+          if(newHighScore){
+            scoreString[0] = Integer.toString(currentScore);
+            saveStrings("data/highScore.txt", scoreString);
+          }
+        } else {
+          deathTimer=millis();
+          deathStep++;
+        }
       }
     } else if (deathStep == 1) {
       //noStroke();
@@ -186,16 +192,12 @@ void draw() {
       //drawPlayer();
       drawUI();
       if (deathTimer + 4000 < millis()) {
+        lives--;
         playerRotation=0.0;
         deathTimer=0;
-        lives--;
+        deathStep=0;
         playerAlive=true;
         gen.clearBlocks();
-        if (lives <= 0) {
-          gameMode = 4;
-          timer = millis();
-          newHighScore = currentScore > highScore;
-      }
       } 
     }
   } else if (gameMode == 1) { // Main menu
@@ -238,9 +240,6 @@ void draw() {
       }
     } else {
       drawUI();
-      if (timer + 8000 < millis() && !newHighScore) {
-        gameMode = 1;
-      }
     }
   }
 }
@@ -352,8 +351,15 @@ void keyPressed() {
         break;
     }
 
-  } else { // Game over screen
-    
+  } else if (gameMode == 4) { // Game over screen
+    if (gameOverStep == 4) { //if we're currently incrementing the score onscreen
+      highScore = currentScore;
+      gameOverStep += 1;
+    } else if (gameOverStep >= 5 || (gameOverStep >= 3 && !newHighScore)) { //if we're past the score going up stage
+      resetGame();
+    } else { 
+      gameOverStep += 1;
+    }
   }
 }
 
@@ -545,7 +551,6 @@ void drawUI() {
 
     text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
 
-    noStroke();
     if (playerPhase) {
      fill(bluePhase);
     } else {
@@ -555,18 +560,22 @@ void drawUI() {
     int triWidth = 20;
     int triHeight = 20;
     int padding = 10;
-    int totalLength = (lives * (triWidth+padding)) - padding;
+    int totalLength = ((lives-1) * (triWidth+padding)) - padding;
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
-      for (int i = 0; i < lives; i++) {
+      for (int i = 0; i < lives-1; i++) {
         triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
         -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
         (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
       }
     }
-    stroke(0);
 
     fill(0);
-    if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
+    
+    if (deathStep==1 && lives!=2) {
+      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), 0);
+    } else if (deathStep==1) {
+      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), 0);
+    } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
   } else { //GAME OVER
@@ -579,7 +588,7 @@ void drawUI() {
     }
     if (gameOverStep >= 2) {
       text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
-      if (timer + 1000 < millis()) {
+      if (timer + 1000 < millis() && newHighScore) {
         gameOverStep +=1;
         timer = millis();
       }
@@ -591,13 +600,14 @@ void drawUI() {
         timer = millis();
       }
     }
-    if (gameOverStep >= 4 && newHighScore) {
+    if (gameOverStep == 4 && newHighScore) {
       if (highScore < currentScore) {
         highScore += 1;
-        countingScore = true;
       } else {
-        countingScore = false;
+        gameOverStep += 1;
       }
+    }
+    if (gameOverStep >= 4 && newHighScore) {
       String scoreString = new Integer(highScore).toString(); 
       int scoreLen = scoreString.length();
       for (int i = 0; i < 6 - scoreLen; i++) {
@@ -607,4 +617,35 @@ void drawUI() {
       text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
     }
   } 
+}
+
+void resetGame() {
+  gen = new blockGenerator(2, 1, -1);
+  gameMode = 1; 
+
+  currentScore = 0;
+  lives = 3;
+  level = 1;
+
+  newHighScore = false;
+  gameOverStep = 0;
+  
+  // Player variables
+  // Set up starting player location
+  playerPiece = new PVector[3];
+  playerPiece[0] = new PVector(0,1);
+  playerPiece[1] = new PVector(-1,-1);
+  playerPiece[2] = new PVector(1,-1);
+  playerScale = 0.1;
+  // Player movement
+  playerTranslation = new PVector(0.0, -0.8);
+  moveRight = false;
+  moveLeft = false;
+  moveUp = false;
+  moveDown = false;
+  playerPhase = false; 
+  playerAlive = true;
+  
+  // Enemy variables
+  gameEnemies = new ArrayList();
 }
