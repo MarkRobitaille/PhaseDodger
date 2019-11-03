@@ -15,6 +15,11 @@ int gameMode; // For now default to right in the game, change once title screen 
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
 
+
+// Enemy variables
+ArrayList<gameEnemy> gameEnemies;
+
+
 // Player variables
 PVector[] playerPiece;
 PVector playerTranslation;
@@ -25,7 +30,6 @@ boolean moveUp;
 boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
-
 
 // UI variables
 int highScore;
@@ -67,6 +71,9 @@ void setup() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  
+  // Enemy variables
+  gameEnemies = new ArrayList();
 }
 
 void draw() {
@@ -77,6 +84,11 @@ void draw() {
   if (gameMode == 0) { // Playing game
     // Process things here
     updatePlayer();
+    
+    addEnemy();
+    
+    updateEnemies();
+    checkEnemyCollisions();
     
     // CHECK FOR COLLISIONS
     
@@ -95,6 +107,7 @@ void draw() {
     //playerAlive = !hit;
     
     // Draw things here
+    drawEnemies();
     
     drawPlayer();
     
@@ -201,7 +214,7 @@ void keyReleased() {
           break;
         case DOWN:
           if (debug) {
-            moveUp = false;
+            moveDown = false;
           }
           break;
       }
@@ -281,6 +294,54 @@ void drawPlayer() {
     ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
   }
 }
+
+// ENEMY METHODS
+
+void addEnemy() {
+  
+  // Find level value
+  int levelValue = 0; // if less than 5 levels
+  if (level>=5 && level<10) {
+    levelValue = 1;
+  } else if (level>=10) {
+    levelValue = 2;
+  }
+  
+  //System.out.println(levelValue);
+  
+  if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
+    PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
+    gameEnemies.add(new gameEnemy(startLocation, playerTranslation)); 
+  }
+}
+
+void updateEnemies() {
+  for (int i=0; i<gameEnemies.size(); i++) {
+    gameEnemy currEnemy = gameEnemies.get(i);
+    currEnemy.update(0.01);
+    if (currEnemy.isOffScreen() || currEnemy.hitPlayer) {
+      gameEnemies.remove(currEnemy);
+      currentScore+=20;
+    }
+  }
+}
+
+void drawEnemies() {
+  for (int i=0; i<gameEnemies.size(); i++) {
+    gameEnemies.get(i).drawMe();
+  }
+}
+
+void checkEnemyCollisions() {
+  for (int i=0; i<gameEnemies.size(); i++) {
+    gameEnemy currEnemy = gameEnemies.get(i);
+    if (currEnemy.checkCircleCollision(playerTranslation,playerScale/2)) {
+      playerAlive= false;
+    }
+  }
+}
+  
+// UI METHODS
 
 void drawUI() {
   ortho(-200,200,200,-200);
