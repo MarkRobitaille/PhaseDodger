@@ -32,6 +32,10 @@ int highScore;
 int currentScore;
 int lives;
 int level;
+int timer;
+boolean newHighScore;
+boolean countingScore;
+int gameOverStep;
 PFont font;
 PImage splashImg;
 
@@ -48,12 +52,15 @@ void setup() {
 
   // Initialize UI Variables
   highScore = 100;
-  currentScore = 0;
+  currentScore = 3000;
   lives = 3;
   level = 1;
   textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
+  newHighScore = false;
+  countingScore = false;
+  gameOverStep = 0;
   
   // Player variables
   // Set up starting player location
@@ -103,6 +110,11 @@ void draw() {
     drawPlayer();
     
     // If player is dead, pause block movement, player turns red, lose life, start again?
+    if (lives <= 0) {
+      gameMode = 4;
+      timer = millis();
+      newHighScore = currentScore > highScore;
+    }
     
     // Draw UI last
     
@@ -137,15 +149,23 @@ void draw() {
     stroke(0);
     drawPlayer();
     drawUI();
-
-
-
-  } else { // Game over screen
-    noStroke();
-    gen.drawBlocks();
-    stroke(0);
-    drawPlayer();
-
+  } else if (gameMode == 4) { // Game over screen
+    if (gameOverStep == 0) {
+      noStroke();
+      gen.drawBlocks();
+      stroke(0);
+      drawPlayer();
+      drawUI();
+      if (timer + 2000 < millis()) {
+        gameOverStep += 1;
+        timer = millis();
+      }
+    } else {
+      drawUI();
+      if (timer + 8000 < millis() && !newHighScore) {
+        gameMode = 1;
+      }
+    }
   }
 }
 
@@ -215,6 +235,9 @@ void keyPressed() {
           break;
         case 'p':
           gameMode = 2;
+          break;
+        case 'm':
+          lives -= 1;
           break;
       }
     }
@@ -361,46 +384,85 @@ void drawUI() {
   textFont(font, 20);
   textAlign(LEFT);
 
-  //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
-  String hsString = new Integer(highScore).toString(); 
-  int hsLen = hsString.length();
-  for (int i = 0; i < 6 - hsLen; i++) {
-    hsString = "0" + hsString;
-  }
-
-  text("HighScore: " + hsString, -380, -360);
-
-  String csString = new Integer(currentScore).toString();
-  int csLen = csString.length();
-  for (int i = 0; i < 6 - csLen; i++) {
-    csString = "0" + csString;
-  }
-  text("Score: " + csString, 380-textWidth("Score: " + csString), -360);
-
-  text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
-
-  noStroke();
-  if (playerPhase) {
-   fill(bluePhase);
-  } else {
-   fill(pinkPhase);
-  }
-
-  int triWidth = 20;
-  int triHeight = 20;
-  int padding = 10;
-  int totalLength = (lives * (triWidth+padding)) - padding;
-  if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
-    for (int i = 0; i < lives; i++) {
-      triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
-      -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
-      (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+  if (gameMode == 0 || gameMode == 2 || (gameMode == 4 && gameOverStep == 0)) {
+    //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
+    String hsString = new Integer(highScore).toString(); 
+    int hsLen = hsString.length();
+    for (int i = 0; i < 6 - hsLen; i++) {
+      hsString = "0" + hsString;
     }
-  }
-  stroke(0);
 
-  fill(0);
-  if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
-    text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
-  }
+    text("HighScore: " + hsString, -380, -360);
+
+    String csString = new Integer(currentScore).toString();
+    int csLen = csString.length();
+    for (int i = 0; i < 6 - csLen; i++) {
+      csString = "0" + csString;
+    }
+    text("Score: " + csString, 380-textWidth("Score: " + csString), -360);
+
+    text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
+
+    noStroke();
+    if (playerPhase) {
+     fill(bluePhase);
+    } else {
+     fill(pinkPhase);
+    }
+
+    int triWidth = 20;
+    int triHeight = 20;
+    int padding = 10;
+    int totalLength = (lives * (triWidth+padding)) - padding;
+    if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
+      for (int i = 0; i < lives; i++) {
+        triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
+        -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
+        (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+      }
+    }
+    stroke(0);
+
+    fill(0);
+    if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
+      text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
+    }
+  } else { //GAME OVER
+    fill(255, 0, 0);
+    text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
+    fill(0);
+    if (timer + 2000 < millis()) {
+      gameOverStep += 1;
+      timer = millis();
+    }
+    if (gameOverStep >= 2) {
+      text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
+      if (timer + 1000 < millis()) {
+        gameOverStep +=1;
+        timer = millis();
+      }
+    }
+    if (gameOverStep >= 3 && newHighScore) {
+      text("NEW HIGHSCORE!", floor(-textWidth("NEW HIGHSCORE!")/2 + 0.5), 100);
+      if (timer + 1000 < millis()) {
+        gameOverStep += 1;
+        timer = millis();
+      }
+    }
+    if (gameOverStep >= 4 && newHighScore) {
+      if (highScore < currentScore) {
+        highScore += 1;
+        countingScore = true;
+      } else {
+        countingScore = false;
+      }
+      String scoreString = new Integer(highScore).toString(); 
+      int scoreLen = scoreString.length();
+      for (int i = 0; i < 6 - scoreLen; i++) {
+        scoreString = "0" + scoreString;
+      }
+
+      text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
+    }
+  } 
 }
