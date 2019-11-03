@@ -15,7 +15,7 @@ color pinkPhase = color(255,192,203);
 int gameMode; // For now default to right in the game, change once title screen is made
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
-float [] gameSpeedArr = {0.01,0.013,0.014,0.015,0.015,0.016,0.016,0.016,0.017};
+float [] gameSpeedArr = {0.01,0.013,0.014,0.0145,0.0152,0.016,0.016,0.016,0.017};
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
 

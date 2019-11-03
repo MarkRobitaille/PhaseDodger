@@ -15,8 +15,6 @@ public class gameEnemy {
     current = start.copy();
     goal = new PVector(); // To avoid always pointing to the player's location
     goal = playerLocation.copy();
-    goal.x *= 1.3;
-    goal.y *= 1.3;
     progress=0;
     hitPlayer = false;
     alienTex = img;
@@ -45,6 +43,8 @@ public class gameEnemy {
       fill(0);
       ellipse(current.x, current.y, enemyHitBox, enemyHitBox);
     }
+    stroke(255,0,0);
+    line(start.x, start.y, goal.x, goal.y);
     stroke(0);
   }
   

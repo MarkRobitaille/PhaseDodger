@@ -64,7 +64,7 @@ if(blockList.size()<=0){
   
     for (int i= 0; i< lanes.length; i++){
 
-    PVector newPos = new PVector(lanes[i], top);
+    PVector newPos = new PVector(lanes[i], top+2/numLanes);
     
     int c = int(random(0,2));
     boolean trueBlue = (c == 0);
