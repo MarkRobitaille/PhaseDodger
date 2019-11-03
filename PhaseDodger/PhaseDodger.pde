@@ -44,6 +44,16 @@ String highscoreFile = "highscore.txt";
 BufferedReader highscoreReader;
 PrintWriter highscoreWriter;
 void setup() {
+  highscoreReader = createReader(highscoreFile);
+  highscoreWriter = createWriter(highscoreFile);
+  String scoreString;
+  try{
+  scoreString = highscoreReader.readLine();
+  }catch (IOException e) {
+    e.printStackTrace();
+    scoreString = null;
+  }
+ 
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
@@ -54,7 +64,7 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  highScore = 100;
+  highScore = int(scoreString);
   currentScore = 0;
   lives = 3;
   level = 1;
