@@ -8,7 +8,7 @@ float minSpeed;
 float maxSpeed;
 int maxLife; //max life in milliseconds
 int minLife; //min life in milliseconds
-float spawnRate; //times per second to spawn
+int spawnRate;
 int spawnTimer;
 float size;
 float sizeOverLifetime;
@@ -17,13 +17,14 @@ int timer;
 
 
 
-	public particleSystem(PVector pos, PImage particleImage, float minSpeed, float maxSpeed, int minLife, int maxLife, float spawnRate, float size, float sizeOverLifetime) {
+	public particleSystem(PVector pos, PImage particleImage, float minSpeed, float maxSpeed, int minLife, int maxLife, int spawnRate, float size, float sizeOverLifetime) {
 		this.pos = pos;
 		this.particleImage = particleImage;
 		this.minSpeed = minSpeed;
 		this.maxSpeed = maxSpeed;
 		this.minLife = minLife;
 		this.maxLife = maxLife;
+		this.spawnRate = spawnRate;
 		this.size = size;
 		this.sizeOverLifetime = sizeOverLifetime;
 		children = new ArrayList();
@@ -38,7 +39,7 @@ int timer;
 		timer = millis();
 		spawnTimer += dt;
 
-		if (spawnTimer >= spawnRate * 1000) {
+		if (spawnTimer >= spawnRate) {
 			float speed = random(minSpeed, maxSpeed);
 			float angle = random(TWO_PI);
 			PVector vel = new PVector(speed, 0);
@@ -50,15 +51,14 @@ int timer;
 		}
 
 		if (!children.isEmpty()) {
-			for (int i = 0; i < children.size(); i++) {
+			for (int i = children.size() - 1; i >= 0; i--) {
 				if (children.get(i).drawMe(dt)) {
 					indexOfDeadChildren.add(i);
-					println("child to die: " + i);
 				}
 			}
 			if (!indexOfDeadChildren.isEmpty()) {
-				for (int i = indexOfDeadChildren.size() - 1; i >= 0; i--) {
-					children.remove(indexOfDeadChildren.get(i));
+				for (int i = 0; i < indexOfDeadChildren.size(); i++) {
+					children.remove((int)indexOfDeadChildren.get(i));
 				}
 			}
 		}
