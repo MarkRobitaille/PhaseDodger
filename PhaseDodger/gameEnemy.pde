@@ -1,4 +1,5 @@
 final static float enemySize = 0.25;
+final static float enemyHitBox = 0.2;
 
 public class gameEnemy {
   PVector start;
@@ -14,12 +15,11 @@ public class gameEnemy {
     current = start.copy();
     goal = new PVector(); // To avoid always pointing to the player's location
     goal = playerLocation.copy();
-    goal.x *= 1.5;
-    goal.y *= 1.5;
+    goal.x *= 1.3;
+    goal.y *= 1.3;
     progress=0;
     hitPlayer = false;
     alienTex = img;
-    
   }
   
   public void update(float enemySpeed) {
@@ -36,20 +36,20 @@ public class gameEnemy {
     hitPlayer = true;
   }
   
-  public void drawMe() {
+  public void drawMe(boolean debug) {
 
     stroke(116,71,105);
-    //PShape enemy = createShape(ELLIPSE,current.x, current.y, enemySize, enemySize);
-    //shape(enemy);
     imageMode(CENTER);
     image(alienTex, current.x, current.y,enemySize, enemySize);
-    //ellipse(current.x, current.y, enemySize, enemySize);
+    if(debug) {
+      fill(0);
+      ellipse(current.x, current.y, enemyHitBox, enemyHitBox);
+    }
     stroke(0);
   }
   
   public boolean isOffScreen() {
     if (current.y + enemySize/2 < -1) {
-      //System.out.println("DELETE");
       return true;
     }
     return false;
@@ -58,7 +58,7 @@ public class gameEnemy {
   public boolean checkCircleCollision(PVector playerPos, float playerRadius) {
     boolean hit = false;
     
-    if (Math.sqrt(Math.pow(playerPos.x - current.x,2) + Math.pow(playerPos.y - current.y,2))< playerRadius + enemySize/2) {
+    if (Math.sqrt(Math.pow(playerPos.x - current.x,2) + Math.pow(playerPos.y - current.y,2))< playerRadius + enemyHitBox/2) {
       //System.out.println("Player position: " + playerPos.x + ", " + playerPos.y);
       //System.out.println("Enemy position: " + current.x + ", " + current.y);
       hit = true;

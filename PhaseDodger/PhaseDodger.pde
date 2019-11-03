@@ -13,18 +13,14 @@ color pinkPhase = color(255,192,203);
 int gameMode; // For now default to right in the game, change once title screen is made
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
-float gameSpeed;
-
+float [] gameSpeedArr = {0.01,0.013,0.014,0.015,0.015,0.016,0.016,0.016,0.017};
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
 
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
 blockGenerator gen;
 
-//int[] levelArray = {100, 500, 1000};
-
 // Player variables
-PVector[] playerPiece;
 PVector playerTranslation;
 float playerScale;
 boolean moveRight;
@@ -33,11 +29,15 @@ boolean moveUp;
 boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
+PVector hitboxPos;
+float hitboxRadius;
 
 // Player death
 int deathTimer;
 int deathStep;
 float playerRotation;
+
+float enemyTimer;
 
 // UI variables
 int highScore;
@@ -49,31 +49,48 @@ boolean newHighScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
-PImage alienImg;
 
-//particle system testing
-particleSystem testSystem;
-PImage testParticle;
+//PImage alienImg;
+PImage[] enemyImgArray;
+PImage[] blueShip;
+PImage[] pinkShip;
 
-//File I/0
-String highscoreFile = "highscore.txt";
-//BufferedReader highscoreReader;
-//PrintWriter highscoreWriter
+  //particle system testing
+  particleSystem testSystem;
+  PImage testParticle;
+
  String scoreString[];
 void setup() {
-  // highscoreReader = createReader(highscoreFile);
-  //highscoreWriter = createWriter(highscoreFile);
-  alienImg = loadImage("data/enemy.png");
+
+ //alienImg = loadImage("data/enemy.png");
+  enemyImgArray = new PImage[6];
+  enemyImgArray[0] = loadImage("data/enemy.png");
+  enemyImgArray[1] = loadImage("data/enemy2.png");
+  enemyImgArray[2] = loadImage("data/enemy3.png");
+  enemyImgArray[3] = loadImage("data/enemy4.png");
+  enemyImgArray[4] = loadImage("data/enemy5.png");
+  enemyImgArray[5] = loadImage("data/enemy6.png");
+
+  blueShip = new PImage[3];
+  blueShip[0] = loadImage("data/playerblueleft.png");
+  blueShip[1] = loadImage("data/playerblue.png");
+  blueShip[2] = loadImage("data/playerblueright.png");
+  pinkShip = new PImage[3];
+  pinkShip[0] = loadImage("data/playerpinkleft.png");
+  pinkShip[1] = loadImage("data/playerpink.png");
+  pinkShip[2] = loadImage("data/playerpinkright.png");
+  
   testParticle = loadImage("data/explosion.png");
   testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
- 
+
   scoreString = loadStrings("highscore.txt");
    
-  gen = new blockGenerator(2, 1, -1);
-  size(800, 800, P3D);
-  //surface.setResizable(true); // Make it work maximized?
+
+  size(800,800, P3D);
+  surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
+  smooth(4);
   
   // Game state variables
   gameMode = 1;
@@ -84,7 +101,8 @@ void setup() {
   currentScore = 0;
   lives = 3;
   level = 1;
-  textMode(SHAPE); //Makes text not fuzzy
+
+  //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
@@ -92,10 +110,6 @@ void setup() {
   
   // Player variables
   // Set up starting player location
-  playerPiece = new PVector[3];
-  playerPiece[0] = new PVector(0,1);
-  playerPiece[1] = new PVector(-1,-1);
-  playerPiece[2] = new PVector(1,-1);
   playerScale = 0.1;
   // Player movement
   playerTranslation = new PVector(0.0, -0.8);
@@ -103,7 +117,13 @@ void setup() {
   moveLeft = false;
   moveUp = false;
   moveDown = false;
-  playerPhase = false; 
+  playerPhase = false;
+  // Initialize hitbox for player
+  hitboxPos = new PVector();
+  hitboxPos = playerTranslation.copy();
+  hitboxPos.y -= 0.025;
+  hitboxRadius = playerScale/3;
+  // Player Death/Life variables
   playerAlive = true;
   deathTimer = 0;
   deathStep = 0;
@@ -111,17 +131,27 @@ void setup() {
   
   // Enemy variables
   gameEnemies = new ArrayList();
+  gen = new blockGenerator(level + 1 , 1, -1);
+  enemyTimer = millis();
 }
 
 void draw() {
   resetMatrix();
   ortho(-1, 1, 1, -1);
-  background(255,255,255);
+  background(0,0,0);
+  if (width>height) {
+    scale((float)height/(float)width, 1);
+  }else {
+    scale(1, (float)width/(float)height);
+  }
+  
+  fill(255,255,255);
+  rect(-1, -1, 2, 2);
   
   if (gameMode == 0) { // Playing game
     if (playerAlive) {
       noStroke();
-      gen.run(0.01);
+      gen.run(gameSpeedArr[level-1]);
       currentScore += gen.getBlockScore();
       changeLevel();
       
@@ -133,17 +163,17 @@ void draw() {
       // CHECK FOR COLLISIONS
   
       // Find player's hitbox details (hitbox is circle) 
-      PVector hitboxPos = new PVector();
       hitboxPos = playerTranslation.copy();
       hitboxPos.y -= 0.025;
-      float hitboxRadius = playerScale/2;
       
       boolean hit = false; 
       
       // Check for collisions against enemies
+     
       hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
   
       // Check for collisions against blocks
+     
       for (int i=0; i<gen.blockList.size() && !hit; i++) {
         gameBlock currBlock = gen.blockList.get(i);
         hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
@@ -165,6 +195,12 @@ void draw() {
       }
       
       // Draw UI last
+      resetMatrix();
+      if (width>height) {
+        scale((float)height/(float)width, 1);
+      }else {
+        scale(1, (float)width/(float)height);
+      }
       drawUI();
     } else if (deathStep == 0) {
       playerRotation+=0.2;
@@ -173,6 +209,12 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      resetMatrix();
+      if (width>height) {
+        scale((float)height/(float)width, 1);
+      }else {
+        scale(1, (float)width/(float)height);
+      }
       drawUI();
       if (deathTimer + 2000 < millis()) {
         if (lives-1 <= 0) {
@@ -197,6 +239,11 @@ void draw() {
     }
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
+  //  if (width>height) {
+  //  scale((float)height/(float)width, 1);
+  //}else {
+  //  scale(1, (float)width/(float)height);
+  //}
     scale(1,-1);
     fill(0);
     textFont(font, 20);
@@ -433,26 +480,35 @@ void drawPlayer() {
   translate(playerTranslation.x, playerTranslation.y);
   rotate(playerRotation);
   scale(playerScale, playerScale);
-  strokeWeight(1/playerScale);
-  if (playerPhase) {
-    fill(bluePhase);
+  
+  imageMode(CENTER);
+  if (playerPhase) { // (playerPhase && playerAlive) { // Then in else have red ship?
+    if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
+      image(blueShip[1], 0, 0, 2, 2);
+    } else if (moveLeft) { // Moving left
+      image(blueShip[0], 0, 0, 2, 2);
+    } else { // Moving right
+      image(blueShip[2], 0, 0, 2, 2);
+    }
   } else {
-    fill(pinkPhase);
+    if ((moveLeft && moveRight) || (!moveLeft && !moveRight) || !playerAlive) { // Not moving left or right
+      image(pinkShip[1], 0, 0, 2, 2);
+    } else if (moveLeft) { // Moving left
+      image(pinkShip[0], 0, 0, 2, 2);
+    } else { // Moving right
+      image(pinkShip[2], 0, 0, 2, 2);
+    }
   }
   
-  if(!playerAlive) {
-    fill(255,0,0);
-  }
+  //if(!playerAlive) {
+  //  fill(255,0,0);
+  //}
   
-  triangle(playerPiece[0].x, playerPiece[0].y, 
-  playerPiece[1].x, playerPiece[1].y, 
-  playerPiece[2].x, playerPiece[2].y);
-
-  strokeWeight(1);
   resetMatrix();
-  
+  strokeWeight(1);
   if (debug) {
-    ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
+    fill(0);
+    ellipse(hitboxPos.x, hitboxPos.y, hitboxRadius*2, hitboxRadius*2);
   }
 }
 
@@ -485,17 +541,19 @@ void addEnemy() {
   
   // Find level value
   int levelValue = 0; // if less than 5 levels
-  if (level>=10 && level<20) {
+  if (level>=5 && level<8) {
     levelValue = 1;
-  } else if (level>=30) {
+  } else if (level>=8) {
     levelValue = 2;
   }
   
   //System.out.println(levelValue);
   
-  if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
-    PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
-    gameEnemies.add(new gameEnemy(startLocation, playerTranslation, alienImg)); 
+  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()) {
+    PVector startLocation = new PVector((float)Math.random()*1.5-1.0,  1.25);
+    int alienIndex = int(random(enemyImgArray.length));
+    gameEnemies.add(new gameEnemy(startLocation, playerTranslation, enemyImgArray[alienIndex])); 
+    enemyTimer = millis();
   }
 }
 
@@ -512,7 +570,7 @@ void updateEnemies() {
 
 void drawEnemies() {
   for (int i=0; i<gameEnemies.size(); i++) {
-    gameEnemies.get(i).drawMe();
+    gameEnemies.get(i).drawMe(debug);
   }
 }
 
@@ -531,6 +589,11 @@ boolean checkEnemyCollisions(PVector playerPos, float playerRadius) {
 
 void drawUI() {
   ortho(-400,400,400,-400);
+  //if (width>height) {
+  //  scale((float)height/(float)width, 1);
+  //}else {
+  //  scale(1, (float)width/(float)height);
+  //}
   scale(1, -1); //Flip it 
   fill(0);
   textFont(font, 20);
@@ -555,23 +618,50 @@ void drawUI() {
 
     text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
 
+    PImage lifeImage;
     if (playerPhase) {
-     fill(bluePhase);
+     lifeImage = blueShip[1];
     } else {
-     fill(pinkPhase);
+     lifeImage = pinkShip[1];
     }
-
-    int triWidth = 20;
-    int triHeight = 20;
+    
+    int shipSize = 20;
     int padding = 10;
-    int totalLength = ((lives-1) * (triWidth+padding)) - padding;
+    
+    scale(1, -1);
+    
+    int totalLength = ((lives-1) * (shipSize+padding)) - padding;
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
       for (int i = 0; i < lives-1; i++) {
-        triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
-        -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
-        (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+        image(lifeImage, (-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), 330, 20, 20);
+        
+        //triangle((-totalLength/2 + shipSize/2) + (i*(padding + shipSize)), -340, //coords for point one (top)
+        //-totalLength/2 + (i*(padding + shipSize)), -320, //coords for bottom left
+        //(-totalLength/2 + shipSize) + (i*(padding + shipSize)),-320); //coords for bottom right
       }
     }
+    
+    scale(1, -1);
+
+    // If you want 
+
+    //if (playerPhase) {
+    // fill(bluePhase);
+    //} else {
+    // fill(pinkPhase);
+    //}
+
+    //int triWidth = 20;
+    //int triHeight = 20;
+    //int padding = 10;
+    //int totalLength = ((lives-1) * (triWidth+padding)) - padding;
+    //if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
+    //  for (int i = 0; i < lives-1; i++) {
+    //    triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
+    //    -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
+    //    (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+    //  }
+    //}
 
     fill(0);
     
@@ -640,10 +730,6 @@ void resetGame() {
   
   // Player variables
   // Set up starting player location
-  playerPiece = new PVector[3];
-  playerPiece[0] = new PVector(0,1);
-  playerPiece[1] = new PVector(-1,-1);
-  playerPiece[2] = new PVector(1,-1);
   playerScale = 0.1;
   // Player movement
   playerTranslation = new PVector(0.0, -0.8);
