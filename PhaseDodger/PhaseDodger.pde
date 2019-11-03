@@ -15,10 +15,8 @@ int gameMode; // For now default to right in the game, change once title screen 
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
 
-
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
-
 
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
 blockGenerator gen;
@@ -58,10 +56,9 @@ String highscoreFile = "highscore.txt";
 //PrintWriter highscoreWriter
  String scoreString[];
 void setup() {
- // highscoreReader = createReader(highscoreFile);
+  // highscoreReader = createReader(highscoreFile);
   //highscoreWriter = createWriter(highscoreFile);
  
-
   scoreString = loadStrings("highscore.txt");
    
   gen = new blockGenerator(2, 1, -1);
@@ -104,7 +101,6 @@ void setup() {
   deathStep = 0;
   playerRotation = 0.0;
   
-  
   // Enemy variables
   gameEnemies = new ArrayList();
 }
@@ -120,15 +116,13 @@ void draw() {
       gen.run(0.01);
       currentScore += gen.getBlockScore();
       changeLevel();
-      updatePlayer();
-  
-      addEnemy();
-  
       
+      // Update entities
+      updatePlayer();
+      addEnemy();
       updateEnemies();
       
       // CHECK FOR COLLISIONS
-      
   
       // Find player's hitbox details (hitbox is circle) 
       PVector hitboxPos = new PVector();
@@ -186,15 +180,9 @@ void draw() {
         }
       }
     } else if (deathStep == 1) {
-      //noStroke();
-      //gen.drawBlocks();
-      //drawEnemies();
-      //stroke(0);
-      //drawPlayer();
       drawUI();
       if (deathTimer + 4000 < millis()) {
         resetAfterDeath();
-        
       } 
     }
   } else if (gameMode == 1) { // Main menu
@@ -205,6 +193,7 @@ void draw() {
     textAlign(LEFT);
     image(splashImg, -300, -200);
 
+    text("HIGHSCORE: " + highScore, floor(-textWidth("HIGHSCORE" + highScore)/2 + 0.5), -360);
     text("PHASE TYPE", floor(-textWidth("PHASE TYPE")/2 + 0.5), 100);
     text("SWAP", -150, 200);
     text("HOLD", 150-textWidth("HOLD"), 200);
@@ -220,16 +209,12 @@ void draw() {
   } else if (gameMode == 2) { // pause screen
     noStroke();
     gen.drawBlocks();
+    drawEnemies();
     stroke(0);
     drawPlayer();
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
-      //noStroke();
-      //gen.drawBlocks();
-      //drawEnemies();
-      //stroke(0);
-      //drawPlayer();
       drawUI();
       if (timer + 1000 < millis()) {
         gameOverStep += 1;
@@ -352,7 +337,7 @@ void keyPressed() {
     if (gameOverStep == 4) { //if we're currently incrementing the score onscreen
       highScore = currentScore;
       gameOverStep += 1;
-    } else if (gameOverStep >= 5 || (gameOverStep >= 3 && !newHighScore)) { //if we're past the score going up stage
+    } else if (gameOverStep >= 5 || (gameOverStep >= 2 && !newHighScore)) { //if we're past the score going up stage
       resetGame();
     } else { 
       gameOverStep += 1;
@@ -590,20 +575,20 @@ void drawUI() {
     fill(255, 0, 0);
     text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
     fill(0);
-    if (timer + 2000 < millis()) {
+    if (gameOverStep == 1 && timer + 1000 < millis()) {
       gameOverStep += 1;
       timer = millis();
     }
     if (gameOverStep >= 2) {
       text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
-      if (timer + 1000 < millis() && newHighScore) {
+      if (gameOverStep == 2 && timer + 1000 < millis() && newHighScore) {
         gameOverStep +=1;
         timer = millis();
       }
     }
     if (gameOverStep >= 3 && newHighScore) {
       text("NEW HIGHSCORE!", floor(-textWidth("NEW HIGHSCORE!")/2 + 0.5), 100);
-      if (timer + 1000 < millis()) {
+      if (gameOverStep == 3 && timer + 1000 < millis()) {
         gameOverStep += 1;
         timer = millis();
       }
