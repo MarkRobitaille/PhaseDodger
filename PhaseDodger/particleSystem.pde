@@ -67,7 +67,7 @@ int timer;
 	public void drawMe() {
 		if (!children.isEmpty()) {
 			for (int i = children.size() - 1; i >= 0; i--) {
-				children.get(i).drawMe());
+				children.get(i).drawMe();
 			}
 			
 		}

@@ -276,6 +276,9 @@ void draw() {
       drawEnemies();
       stroke(0);
       drawPlayer();
+      if (!playerAlive) {
+        playerExplosion.drawMe();
+      }
     }
     drawUI();
   } else if (gameMode == 4) { // Game over screen
