@@ -33,7 +33,7 @@ int timer;
 		spawnTimer = 0;
 	}
 
-	public void drawMe() {
+	public void update() {
 		indexOfDeadChildren.clear();
 		int dt = millis() - timer;
 		timer = millis();
@@ -52,7 +52,7 @@ int timer;
 
 		if (!children.isEmpty()) {
 			for (int i = children.size() - 1; i >= 0; i--) {
-				if (children.get(i).drawMe(dt)) {
+				if (children.get(i).update(dt)) {
 					indexOfDeadChildren.add(i);
 				}
 			}
@@ -61,6 +61,15 @@ int timer;
 					children.remove((int)indexOfDeadChildren.get(i));
 				}
 			}
+		}
+	}
+
+	public void drawMe() {
+		if (!children.isEmpty()) {
+			for (int i = children.size() - 1; i >= 0; i--) {
+				children.get(i).drawMe());
+			}
+			
 		}
 	}
 }
