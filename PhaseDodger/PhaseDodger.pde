@@ -1,7 +1,7 @@
 // CONSTANTS
 
 final float playerSpeed = 0.03;
-final boolean debug = true;
+final boolean debug = false;
 
 // Colors
 color bluePhase = color(135,206,250);
@@ -15,10 +15,8 @@ int gameMode; // For now default to right in the game, change once title screen 
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
 
-
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
-
 
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
 blockGenerator gen;
@@ -35,6 +33,11 @@ boolean moveUp;
 boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
+
+// Player death
+int deathTimer;
+int deathStep;
+float playerRotation;
 
 // UI variables
 int highScore;
@@ -53,19 +56,21 @@ String highscoreFile = "highscore.txt";
 //PrintWriter highscoreWriter
  String scoreString[];
 void setup() {
- // highscoreReader = createReader(highscoreFile);
+  // highscoreReader = createReader(highscoreFile);
   //highscoreWriter = createWriter(highscoreFile);
  alienImg = loadImage("data/enemy.png");
 
+ 
   scoreString = loadStrings("highscore.txt");
    
   gen = new blockGenerator(2, 1, -1);
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
+  hint(DISABLE_OPTIMIZED_STROKE);
   
   // Game state variables
-  gameMode = 1; // CHANGE TO 1 (TITLE SCREEN) ONCE IMPLEMENTED
+  gameMode = 1;
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
@@ -94,6 +99,9 @@ void setup() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  deathTimer = 0;
+  deathStep = 0;
+  playerRotation = 0.0;
   
   // Enemy variables
   gameEnemies = new ArrayList();
@@ -105,62 +113,80 @@ void draw() {
   background(255,255,255);
   
   if (gameMode == 0) { // Playing game
-    gen.run(0.01);
-    currentScore += gen.getBlockScore();
-    changeLevel();
-    updatePlayer();
-
-    addEnemy();
-
-    
-    updateEnemies();
-    
-    // CHECK FOR COLLISIONS
-    
-
-    // Find player's hitbox details (hitbox is circle) 
-    PVector hitboxPos = new PVector();
-    hitboxPos = playerTranslation.copy();
-    hitboxPos.y -= 0.025;
-    float hitboxRadius = playerScale/2;
-    
-    boolean hit = false; 
-    
-    // Check for collisions against enemies
-    hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
-
-    // Check for collisions against blocks
-    for (int i=0; i<gen.blockList.size() && !hit; i++) {
-      gameBlock currBlock = gen.blockList.get(i);
-      hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
-    }
-    
-    playerAlive = !hit;
-    
-    // Draw things here
-    drawEnemies();
-    
-    stroke(0);
-    drawPlayer();
-    
-    // If player is dead, pause block movement, player turns red, lose life, start again?
-    if (lives <= 0) {
-      gameMode = 4;
-      timer = millis();
-      newHighScore = currentScore > highScore;
-      if(newHighScore){
-      scoreString[0] = Integer.toString(currentScore);
-      saveStrings("data/highScore.txt", scoreString);
+    if (playerAlive) {
+      noStroke();
+      gen.run(0.01);
+      currentScore += gen.getBlockScore();
+      changeLevel();
+      
+      // Update entities
+      updatePlayer();
+      addEnemy();
+      updateEnemies();
+      
+      // CHECK FOR COLLISIONS
+  
+      // Find player's hitbox details (hitbox is circle) 
+      PVector hitboxPos = new PVector();
+      hitboxPos = playerTranslation.copy();
+      hitboxPos.y -= 0.025;
+      float hitboxRadius = playerScale/2;
+      
+      boolean hit = false; 
+      
+      // Check for collisions against enemies
+      hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
+  
+      // Check for collisions against blocks
+      for (int i=0; i<gen.blockList.size() && !hit; i++) {
+        gameBlock currBlock = gen.blockList.get(i);
+        hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
       }
+      
+      playerAlive = !hit;
+      
+      // Draw things here
+      drawEnemies();
+      
+      stroke(0);
+      drawPlayer();
+      
+      // If player is dead, pause block movement, player turns red, lose life, start again?
+      if (!playerAlive) {
+        deathTimer=millis();
+      }
+      
+      // Draw UI last
+      drawUI();
+    } else if (deathStep == 0) {
+      playerRotation+=0.2;
+      noStroke();
+      gen.drawBlocks();
+      drawEnemies();
+      stroke(0);
+      drawPlayer();
+      drawUI();
+      if (deathTimer + 2000 < millis()) {
+        if (lives-1 <= 0) {
+          resetAfterDeath();
+          gameMode = 4;
+          timer = millis();
+          newHighScore = currentScore > highScore;
+          if(newHighScore){
+            scoreString[0] = Integer.toString(currentScore);
+            saveStrings("data/highScore.txt", scoreString);
+          }
+        } else {
+          deathTimer=millis();
+          deathStep++;
+        }
+      }
+    } else if (deathStep == 1) {
+      drawUI();
+      if (deathTimer + 4000 < millis()) {
+        resetAfterDeath();
+      } 
     }
-    
-    // Draw UI last
-    
-    
-   
-    
-    drawUI();
-    noStroke();
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
     scale(1,-1);
@@ -191,13 +217,8 @@ void draw() {
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
-      noStroke();
-      gen.drawBlocks();
-      drawEnemies();
-      stroke(0);
-      drawPlayer();
       drawUI();
-      if (timer + 2000 < millis()) {
+      if (timer + 1000 < millis()) {
         gameOverStep += 1;
         timer = millis();
       }
@@ -399,7 +420,9 @@ void updatePlayer() {
 
 void drawPlayer() {
   // Translate to player location, draw player, resetMatrix at the end
+  
   translate(playerTranslation.x, playerTranslation.y);
+  rotate(playerRotation);
   scale(playerScale, playerScale);
   strokeWeight(1/playerScale);
   if (playerPhase) {
@@ -423,6 +446,17 @@ void drawPlayer() {
     ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
   }
 }
+
+void resetAfterDeath() {
+  playerRotation=0.0;
+  deathTimer=0;
+  deathStep=0;
+  lives--;
+  playerAlive=true;
+  gen.clearBlocks();
+  gameEnemies.clear();
+}
+
 public void changeLevel(){
   if(level < levelArray.length){
   if(currentScore >= levelArray[level -1]){
@@ -512,7 +546,6 @@ void drawUI() {
 
     text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
 
-    noStroke();
     if (playerPhase) {
      fill(bluePhase);
     } else {
@@ -522,18 +555,22 @@ void drawUI() {
     int triWidth = 20;
     int triHeight = 20;
     int padding = 10;
-    int totalLength = (lives * (triWidth+padding)) - padding;
+    int totalLength = ((lives-1) * (triWidth+padding)) - padding;
     if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
-      for (int i = 0; i < lives; i++) {
+      for (int i = 0; i < lives-1; i++) {
         triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
         -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
         (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
       }
     }
-    stroke(0);
 
     fill(0);
-    if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
+    
+    if (deathStep==1 && lives!=2) {
+      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), 0);
+    } else if (deathStep==1) {
+      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), 0);
+    } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
   } else { //GAME OVER
@@ -574,6 +611,8 @@ void drawUI() {
 
       text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
     }
+    
+    text("PRESS SPACE TO CONTINUE", floor(-textWidth("PRESS SPACE TO CONTINUE")/2 + 0.5), 300);
   } 
 }
 
