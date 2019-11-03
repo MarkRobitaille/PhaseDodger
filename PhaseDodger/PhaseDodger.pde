@@ -13,7 +13,7 @@ color pinkPhase = color(255,192,203);
 int gameMode; // For now default to right in the game, change once title screen is made
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
-float [] gameSpeedArr = {0.014,0.016,0.017,0.018,0.019,0.02,0.0201,0.0204,0.021};
+float [] gameSpeedArr = {0.01,0.013,0.014,0.015,0.015,0.016,0.016,0.016,0.017};
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
 
@@ -37,6 +37,8 @@ boolean playerAlive;
 int deathTimer;
 int deathStep;
 float playerRotation;
+
+float enemyTimer;
 
 // UI variables
 int highScore;
@@ -81,7 +83,7 @@ enemyImgArray[5] = loadImage("data/enemy6.png");
   currentScore = 0;
   lives = 3;
   level = 1;
-  //gameSpeed = level-1;
+
   //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
@@ -110,6 +112,7 @@ enemyImgArray[5] = loadImage("data/enemy6.png");
   // Enemy variables
   gameEnemies = new ArrayList();
   gen = new blockGenerator(level + 1 , 1, -1);
+  enemyTimer = millis();
 }
 
 void draw() {
@@ -140,9 +143,11 @@ void draw() {
       boolean hit = false; 
       
       // Check for collisions against enemies
+     
       hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
   
       // Check for collisions against blocks
+     
       for (int i=0; i<gen.blockList.size() && !hit; i++) {
         gameBlock currBlock = gen.blockList.get(i);
         hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
@@ -482,18 +487,19 @@ void addEnemy() {
   
   // Find level value
   int levelValue = 0; // if less than 5 levels
-  if (level>=10 && level<20) {
+  if (level>=5 && level<8) {
     levelValue = 1;
-  } else if (level>=30) {
+  } else if (level>=8) {
     levelValue = 2;
   }
   
   //System.out.println(levelValue);
   
-  if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
-    PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
+  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()) {
+    PVector startLocation = new PVector((float)Math.random()*1.5-1.0,  1.25);
     int alienIndex = int(random(enemyImgArray.length));
     gameEnemies.add(new gameEnemy(startLocation, playerTranslation, enemyImgArray[alienIndex])); 
+    enemyTimer = millis();
   }
 }
 

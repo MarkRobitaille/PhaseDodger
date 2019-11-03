@@ -14,12 +14,11 @@ public class gameEnemy {
     current = start.copy();
     goal = new PVector(); // To avoid always pointing to the player's location
     goal = playerLocation.copy();
-    goal.x *= 1.5;
-    goal.y *= 1.5;
+    goal.x *= 1.3;
+    goal.y *= 1.3;
     progress=0;
     hitPlayer = false;
     alienTex = img;
-    
   }
   
   public void update(float enemySpeed) {
@@ -37,19 +36,15 @@ public class gameEnemy {
   }
   
   public void drawMe() {
-
     stroke(116,71,105);
-    //PShape enemy = createShape(ELLIPSE,current.x, current.y, enemySize, enemySize);
-    //shape(enemy);
     imageMode(CENTER);
     image(alienTex, current.x, current.y,enemySize, enemySize);
-    //ellipse(current.x, current.y, enemySize, enemySize);
+    
     stroke(0);
   }
   
   public boolean isOffScreen() {
     if (current.y + enemySize/2 < -1) {
-      //System.out.println("DELETE");
       return true;
     }
     return false;
