@@ -606,7 +606,7 @@ void addEnemy() {
 void updateEnemies() {
   for (int i=0; i<gameEnemies.size(); i++) {
     gameEnemy currEnemy = gameEnemies.get(i);
-    currEnemy.update(0.0075);
+    currEnemy.update(0.0065 + (0.0005*level));
     if (currEnemy.isOffScreen() || currEnemy.hitPlayer) {
       gameEnemies.remove(currEnemy);
       currentScore+=20;
