@@ -421,8 +421,8 @@ void keyPressed() {
         gameMode = 0;
         break;
       case 'q':
-        resetGame();
         gameMusic.stop();
+        resetGame();
         break;
       case ' ':
         gameMode = 0;
@@ -789,6 +789,9 @@ void resetGame() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  deathTimer = 0;
+  deathStep = 0;
+  playerRotation = 0.0;
   
   // Enemy variables
   gameEnemies = new ArrayList();
