@@ -102,11 +102,6 @@ void setup() {
   gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   deathSound = new SoundFile(this, "ship-explosion.mp3");
-  size(600,600, P3D);
-  surface.setResizable(true); // Make it work maximized?
-  ortho(-1, 1, 1, -1);
-  hint(DISABLE_OPTIMIZED_STROKE);
-  smooth(4);
   
   // Initialize game state variables
   gameMode = 1;
