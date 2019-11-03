@@ -93,7 +93,8 @@ void setup() {
    
   gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
-  size(800,800, P3D);
+  deathSound = new SoundFile(this, "ship-explosion.mp3");
+  size(600,600, P3D);
   surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
@@ -198,6 +199,7 @@ void draw() {
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
+        deathSound.play();
         deathTimer=millis();
       }
       
@@ -562,7 +564,7 @@ void addEnemy() {
     levelValue = 2;
   }
   
-  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()) {
+  if (gameEnemies.size()<levelValue+1 && enemyTimer+1000<millis()&&!gen.levelOver) {
     PVector startLocation = new PVector((float)Math.random()*1.5-1.0,  1.25);
     int alienIndex = int(random(enemyImgArray.length));
     gameEnemies.add(new gameEnemy(startLocation, playerTranslation, enemyImgArray[alienIndex])); 
