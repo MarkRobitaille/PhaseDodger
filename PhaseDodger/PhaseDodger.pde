@@ -14,6 +14,12 @@ int gameMode; // For now default to right in the game, change once title screen 
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
 float gameSpeed;
+
+
+// Enemy variables
+ArrayList<gameEnemy> gameEnemies;
+
+
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
 blockGenerator gen;
 
@@ -30,12 +36,15 @@ boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
 
-
 // UI variables
 int highScore;
 int currentScore;
 int lives;
 int level;
+int timer;
+boolean newHighScore;
+boolean countingScore;
+int gameOverStep;
 PFont font;
 PImage splashImg;
 
@@ -71,6 +80,9 @@ void setup() {
   textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
+  newHighScore = false;
+  countingScore = false;
+  gameOverStep = 0;
   
   // Player variables
   // Set up starting player location
@@ -87,6 +99,9 @@ void setup() {
   moveDown = false;
   playerPhase = false; 
   playerAlive = true;
+  
+  // Enemy variables
+  gameEnemies = new ArrayList();
 }
 
 void draw() {
@@ -99,9 +114,15 @@ void draw() {
     currentScore += gen.getBlockScore();
     changeLevel();
     updatePlayer();
+
+    addEnemy();
+
     
-     //CHECK FOR COLLISIONS
+    updateEnemies();
     
+    // CHECK FOR COLLISIONS
+    
+
     // Find player's hitbox details (hitbox is circle) 
     PVector hitboxPos = new PVector();
     hitboxPos = playerTranslation.copy();
@@ -110,6 +131,10 @@ void draw() {
     
     boolean hit = false; 
     
+    // Check for collisions against enemies
+    hit = checkEnemyCollisions(hitboxPos, hitboxRadius);
+
+    // Check for collisions against blocks
     for (int i=0; i<gen.blockList.size() && !hit; i++) {
       gameBlock currBlock = gen.blockList.get(i);
       hit = checkHitRect(hitboxPos, hitboxRadius, currBlock.pos, currBlock.w, currBlock.h, currBlock.trueBlue,currBlock.empty);
@@ -118,10 +143,17 @@ void draw() {
     playerAlive = !hit;
     
     // Draw things here
+    drawEnemies();
+    
     stroke(0);
     drawPlayer();
     
     // If player is dead, pause block movement, player turns red, lose life, start again?
+    if (lives <= 0) {
+      gameMode = 4;
+      timer = millis();
+      newHighScore = currentScore > highScore;
+    }
     
     // Draw UI last
     
@@ -150,8 +182,29 @@ void draw() {
       line(-150, 210, textWidth("SWAP")-150, 210);
     }
     strokeWeight(1);
-  } else { // Game over screen
-    
+  } else if (gameMode == 2) { // pause screen
+    noStroke();
+    gen.drawBlocks();
+    stroke(0);
+    drawPlayer();
+    drawUI();
+  } else if (gameMode == 4) { // Game over screen
+    if (gameOverStep == 0) {
+      noStroke();
+      gen.drawBlocks();
+      stroke(0);
+      drawPlayer();
+      drawUI();
+      if (timer + 2000 < millis()) {
+        gameOverStep += 1;
+        timer = millis();
+      }
+    } else {
+      drawUI();
+      if (timer + 8000 < millis() && !newHighScore) {
+        gameMode = 1;
+      }
+    }
   }
 }
 
@@ -221,6 +274,12 @@ void keyPressed() {
             playerPhase = !playerPhase;
           }
           break;
+        case 'p':
+          gameMode = 2;
+          break;
+        case 'm':
+          lives -= 1;
+          break;
       }
     }
   } else if (gameMode == 1) { // Main menu
@@ -246,6 +305,16 @@ void keyPressed() {
           break;
       }
     }
+  } else if (gameMode == 2) { //paused
+    switch(key) {
+      case 'p':
+        gameMode = 0;
+        break;
+      case ' ':
+        gameMode = 0;
+        break;
+    }
+
   } else { // Game over screen
     
   }
@@ -268,7 +337,7 @@ void keyReleased() {
           break;
         case DOWN:
           if (debug) {
-            moveUp = false;
+            moveDown = false;
           }
           break;
       }
@@ -361,6 +430,56 @@ public void changeLevel(){
 }
 }
 
+// ENEMY METHODS
+
+void addEnemy() {
+  
+  // Find level value
+  int levelValue = 0; // if less than 5 levels
+  if (level>=10 && level<20) {
+    levelValue = 1;
+  } else if (level>=30) {
+    levelValue = 2;
+  }
+  
+  //System.out.println(levelValue);
+  
+  if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
+    PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
+    gameEnemies.add(new gameEnemy(startLocation, playerTranslation)); 
+  }
+}
+
+void updateEnemies() {
+  for (int i=0; i<gameEnemies.size(); i++) {
+    gameEnemy currEnemy = gameEnemies.get(i);
+    currEnemy.update(0.0065);
+    if (currEnemy.isOffScreen() || currEnemy.hitPlayer) {
+      gameEnemies.remove(currEnemy);
+      currentScore+=20;
+    }
+  }
+}
+
+void drawEnemies() {
+  for (int i=0; i<gameEnemies.size(); i++) {
+    gameEnemies.get(i).drawMe();
+  }
+}
+
+boolean checkEnemyCollisions(PVector playerPos, float playerRadius) {
+  boolean hit = false;
+  for (int i=0; i<gameEnemies.size() && !hit; i++) {
+    gameEnemy currEnemy = gameEnemies.get(i);
+    if (currEnemy.checkCircleCollision(playerPos,playerRadius)) {
+      hit = true;
+    }
+  }
+  return hit;
+}
+  
+// UI METHODS
+
 void drawUI() {
   ortho(-400,400,400,-400);
   scale(1, -1); //Flip it 
@@ -368,41 +487,85 @@ void drawUI() {
   textFont(font, 20);
   textAlign(LEFT);
 
-  //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
-  String hsString = new Integer(highScore).toString(); 
-  int hsLen = hsString.length();
-  for (int i = 0; i < 6 - hsLen; i++) {
-    hsString = "0" + hsString;
-  }
-
-  text("HighScore: " + hsString, -380, -360);
-
-  String csString = new Integer(currentScore).toString();
-  int csLen = csString.length();
-  for (int i = 0; i < 6 - csLen; i++) {
-    csString = "0" + csString;
-  }
-  text("Score: " + csString, 380-textWidth("Score: " + csString), -360);
-
-  text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
-
-  noStroke();
-  if (playerPhase) {
-   fill(bluePhase);
-  } else {
-   fill(pinkPhase);
-  }
-
-  int triWidth = 20;
-  int triHeight = 20;
-  int padding = 10;
-  int totalLength = (lives * (triWidth+padding)) - padding;
-  if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
-    for (int i = 0; i < lives; i++) {
-      triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
-      -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
-      (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+  if (gameMode == 0 || gameMode == 2 || (gameMode == 4 && gameOverStep == 0)) {
+    //For the high score and current score, we want the number of digits to be constant so we figure out how many digits they are and then add the required number of zeroes to the front
+    String hsString = new Integer(highScore).toString(); 
+    int hsLen = hsString.length();
+    for (int i = 0; i < 6 - hsLen; i++) {
+      hsString = "0" + hsString;
     }
-  }
-  stroke(0);
+
+    text("HighScore: " + hsString, -380, -360);
+
+    String csString = new Integer(currentScore).toString();
+    int csLen = csString.length();
+    for (int i = 0; i < 6 - csLen; i++) {
+      csString = "0" + csString;
+    }
+    text("Score: " + csString, 380-textWidth("Score: " + csString), -360);
+
+    text("LEVEL " + level, floor(-textWidth("LEVEL " + 1)/2 + 0.5), -360);
+
+    noStroke();
+    if (playerPhase) {
+     fill(bluePhase);
+    } else {
+     fill(pinkPhase);
+    }
+
+    int triWidth = 20;
+    int triHeight = 20;
+    int padding = 10;
+    int totalLength = (lives * (triWidth+padding)) - padding;
+    if (lives > 0) { //Assuming we have more than one life at the moment, let's draw the icons for them
+      for (int i = 0; i < lives; i++) {
+        triangle((-totalLength/2 + triWidth/2) + (i*(padding + triWidth)), -340, //coords for point one (top)
+        -totalLength/2 + (i*(padding + triWidth)), -320, //coords for bottom left
+        (-totalLength/2 + triWidth) + (i*(padding + triWidth)),-320); //coords for bottom right
+      }
+    }
+    stroke(0);
+
+    fill(0);
+    if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
+      text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
+    }
+  } else { //GAME OVER
+    fill(255, 0, 0);
+    text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
+    fill(0);
+    if (timer + 2000 < millis()) {
+      gameOverStep += 1;
+      timer = millis();
+    }
+    if (gameOverStep >= 2) {
+      text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
+      if (timer + 1000 < millis()) {
+        gameOverStep +=1;
+        timer = millis();
+      }
+    }
+    if (gameOverStep >= 3 && newHighScore) {
+      text("NEW HIGHSCORE!", floor(-textWidth("NEW HIGHSCORE!")/2 + 0.5), 100);
+      if (timer + 1000 < millis()) {
+        gameOverStep += 1;
+        timer = millis();
+      }
+    }
+    if (gameOverStep >= 4 && newHighScore) {
+      if (highScore < currentScore) {
+        highScore += 1;
+        countingScore = true;
+      } else {
+        countingScore = false;
+      }
+      String scoreString = new Integer(highScore).toString(); 
+      int scoreLen = scoreString.length();
+      for (int i = 0; i < 6 - scoreLen; i++) {
+        scoreString = "0" + scoreString;
+      }
+
+      text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
+    }
+  } 
 }
