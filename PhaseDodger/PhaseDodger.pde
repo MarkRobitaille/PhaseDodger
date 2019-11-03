@@ -68,6 +68,7 @@ void setup() {
   size(800, 800, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
+  hint(DISABLE_OPTIMIZED_STROKE);
   
   // Game state variables
   gameMode = 1;
@@ -171,7 +172,7 @@ void draw() {
       drawUI();
       if (deathTimer + 2000 < millis()) {
         if (lives-1 <= 0) {
-          lives--;
+          resetAfterDeath();
           gameMode = 4;
           timer = millis();
           newHighScore = currentScore > highScore;
@@ -192,12 +193,8 @@ void draw() {
       //drawPlayer();
       drawUI();
       if (deathTimer + 4000 < millis()) {
-        lives--;
-        playerRotation=0.0;
-        deathTimer=0;
-        deathStep=0;
-        playerAlive=true;
-        gen.clearBlocks();
+        resetAfterDeath();
+        
       } 
     }
   } else if (gameMode == 1) { // Main menu
@@ -228,13 +225,13 @@ void draw() {
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
-      noStroke();
-      gen.drawBlocks();
-      drawEnemies();
-      stroke(0);
-      drawPlayer();
+      //noStroke();
+      //gen.drawBlocks();
+      //drawEnemies();
+      //stroke(0);
+      //drawPlayer();
       drawUI();
-      if (timer + 2000 < millis()) {
+      if (timer + 1000 < millis()) {
         gameOverStep += 1;
         timer = millis();
       }
@@ -462,6 +459,17 @@ void drawPlayer() {
     ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
   }
 }
+
+void resetAfterDeath() {
+  playerRotation=0.0;
+  deathTimer=0;
+  deathStep=0;
+  lives--;
+  playerAlive=true;
+  gen.clearBlocks();
+  gameEnemies.clear();
+}
+
 public void changeLevel(){
   if(level < levelArray.length){
   if(currentScore >= levelArray[level -1]){
@@ -616,6 +624,8 @@ void drawUI() {
 
       text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
     }
+    
+    text("PRESS SPACE TO CONTINUE", floor(-textWidth("PRESS SPACE TO CONTINUE")/2 + 0.5), 300);
   } 
 }
 
