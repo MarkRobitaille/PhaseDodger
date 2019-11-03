@@ -43,7 +43,6 @@ int lives;
 int level;
 int timer;
 boolean newHighScore;
-boolean countingScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
@@ -78,7 +77,6 @@ void setup() {
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
-  countingScore = false;
   gameOverStep = 0;
   
   // Player variables
@@ -162,7 +160,7 @@ void draw() {
    
     
     drawUI();
-  noStroke();
+    noStroke();
   } else if (gameMode == 1) { // Main menu
     ortho(-400,400,400,-400);
     scale(1,-1);
@@ -202,9 +200,6 @@ void draw() {
       }
     } else {
       drawUI();
-      if (timer + 8000 < millis() && !newHighScore) {
-        gameMode = 1;
-      }
     }
   }
 }
@@ -316,8 +311,15 @@ void keyPressed() {
         break;
     }
 
-  } else { // Game over screen
-    
+  } else if (gameMode == 4) { // Game over screen
+    if (gameOverStep == 4) { //if we're currently incrementing the score onscreen
+      highScore = currentScore;
+      gameOverStep += 1;
+    } else if (gameOverStep >= 5 || (gameOverStep >= 3 && !newHighScore)) { //if we're past the score going up stage
+      resetGame();
+    } else { 
+      gameOverStep += 1;
+    }
   }
 }
 
@@ -541,7 +543,7 @@ void drawUI() {
     }
     if (gameOverStep >= 2) {
       text("YOUR SCORE: " + currentScore, floor(-textWidth("YOUR SCORE: " + currentScore)/2 + 0.5), 0);
-      if (timer + 1000 < millis()) {
+      if (timer + 1000 < millis() && newHighScore) {
         gameOverStep +=1;
         timer = millis();
       }
@@ -553,13 +555,14 @@ void drawUI() {
         timer = millis();
       }
     }
-    if (gameOverStep >= 4 && newHighScore) {
+    if (gameOverStep == 4 && newHighScore) {
       if (highScore < currentScore) {
         highScore += 1;
-        countingScore = true;
       } else {
-        countingScore = false;
+        gameOverStep += 1;
       }
+    }
+    if (gameOverStep >= 4 && newHighScore) {
       String scoreString = new Integer(highScore).toString(); 
       int scoreLen = scoreString.length();
       for (int i = 0; i < 6 - scoreLen; i++) {
@@ -569,4 +572,36 @@ void drawUI() {
       text(scoreString, floor(-textWidth(scoreString)/2 + 0.5), 200);
     }
   } 
+}
+
+void resetGame() {
+  gen = new blockGenerator(2, 1, -1);
+  gameMode = 1; 
+
+  currentScore = 0;
+  lives = 3;
+  level = 1;
+
+  newHighScore = false;
+  countingScore = false;
+  gameOverStep = 0;
+  
+  // Player variables
+  // Set up starting player location
+  playerPiece = new PVector[3];
+  playerPiece[0] = new PVector(0,1);
+  playerPiece[1] = new PVector(-1,-1);
+  playerPiece[2] = new PVector(1,-1);
+  playerScale = 0.1;
+  // Player movement
+  playerTranslation = new PVector(0.0, -0.8);
+  moveRight = false;
+  moveLeft = false;
+  moveUp = false;
+  moveDown = false;
+  playerPhase = false; 
+  playerAlive = true;
+  
+  // Enemy variables
+  gameEnemies = new ArrayList();
 }
