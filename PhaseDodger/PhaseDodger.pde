@@ -50,6 +50,11 @@ int gameOverStep;
 PFont font;
 PImage splashImg;
 PImage alienImg;
+
+//particle system testing
+particleSystem testSystem;
+PImage testParticle;
+
 //File I/0
 String highscoreFile = "highscore.txt";
 //BufferedReader highscoreReader;
@@ -58,8 +63,9 @@ String highscoreFile = "highscore.txt";
 void setup() {
   // highscoreReader = createReader(highscoreFile);
   //highscoreWriter = createWriter(highscoreFile);
- alienImg = loadImage("data/enemy.png");
-
+  alienImg = loadImage("data/enemy.png");
+  testParticle = loadImage("data/explosion.png");
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
  
   scoreString = loadStrings("highscore.txt");
    
@@ -150,6 +156,8 @@ void draw() {
       
       stroke(0);
       drawPlayer();
+
+      //testSystem.drawMe();
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
@@ -620,6 +628,8 @@ void drawUI() {
 void resetGame() {
   gen = new blockGenerator(2, 1, -1);
   gameMode = 1; 
+
+  testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.01f, 500, 2000, 1f, 0.25f, 1f);
 
   currentScore = 0;
   lives = 3;
