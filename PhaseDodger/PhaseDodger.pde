@@ -1,8 +1,5 @@
 import processing.sound.*;
 
-
-
-
 //CONSTANTS
 
 final float playerSpeed = 0.03;
@@ -69,6 +66,14 @@ particleSystem testSystem;
 PImage testParticle;
 
 void setup() {
+  // Set initial window
+  size(800,800, P3D);
+  surface.setResizable(true); // Make it work maximized?
+  ortho(-1, 1, 1, -1);
+  hint(DISABLE_OPTIMIZED_STROKE);
+  smooth(4);
+  
+  // Load sprite assets
   enemyImgArray = new PImage[6];
   enemyImgArray[0] = loadImage("data/enemy.png");
   enemyImgArray[1] = loadImage("data/enemy2.png");
@@ -86,11 +91,14 @@ void setup() {
   pinkShip[1] = loadImage("data/playerpink.png");
   pinkShip[2] = loadImage("data/playerpinkright.png");
   
+  // Initialize particle system
   testParticle = loadImage("data/explosion.png");
   testSystem = new particleSystem(new PVector(0.5,0.5), testParticle, 0.001f, 0.1f, 1000, 5000, 1f, 0.25f, 1f);
 
+  // Load high score
   scoreString = loadStrings("highscore.txt");
    
+  // Load music files
   gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
   deathSound = new SoundFile(this, "ship-explosion.mp3");
@@ -100,7 +108,7 @@ void setup() {
   hint(DISABLE_OPTIMIZED_STROKE);
   smooth(4);
   
-  // Game state variables
+  // Initialize game state variables
   gameMode = 1;
   phaseHold = false; // Default is swap phase with space
 
@@ -109,8 +117,6 @@ void setup() {
   currentScore = 0;
   lives = 3;
   level = 1;
-
-  //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
@@ -263,14 +269,14 @@ void draw() {
     menuMusic.loop();
   }
   
-  } else if (gameMode == 2) { // pause screen
-    noStroke();
-    gen.drawBlocks();
-    drawEnemies();
-    stroke(0);
-    drawPlayer();
-  
-    
+  } else if (gameMode == 2) { // Pause screen
+    if (deathStep!=1) {
+      noStroke();
+      gen.drawBlocks();
+      drawEnemies();
+      stroke(0);
+      drawPlayer();
+    }
     drawUI();
   } else if (gameMode == 4) { // Game over screen
     if (gameOverStep == 0) {
@@ -284,8 +290,14 @@ void draw() {
     }
   }
   
-  
-  if (height>width) {
+  if (width>height) {
+    resetMatrix();
+    ortho(-1, 1, 1, -1);
+    scale((float)height/(float)width, 1);
+    fill(0,0,0);
+    rect(-5,-1,4,2);
+    rect(1,-1,4,2);
+  } else {
     resetMatrix();
     ortho(-1, 1, 1, -1);
     scale(1, (float)width/(float)height);
@@ -396,6 +408,10 @@ void keyPressed() {
     switch(key) {
       case 'p':
         gameMode = 0;
+        break;
+      case 'q':
+        resetGame();
+        gameMusic.stop();
         break;
       case ' ':
         gameMode = 0;
@@ -681,12 +697,16 @@ void drawUI() {
     fill(0);
     
     if (deathStep==1 && lives!=2) {
-      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIVES REMAINING", floor(-textWidth("_ LIVES REMAINING")/2 + 0.5), -100);
     } else if (deathStep==1) {
-      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), 0);
+      text((lives-1)+" LIFE REMAINING", floor(-textWidth("_ LIFE REMAINING")/2 + 0.5), -100);
     } if (gameMode == 2 && second()%2 == 0) { //if we're paused, flash pause in the middle of the screen
       text("PAUSED", floor(-textWidth("PAUSED")/2 + 0.5), 0);
     }
+    
+     if (gameMode == 2) {
+       text("PRESS Q TO QUIT", floor(-textWidth("PRESS Q TO QUIT")/2 + 0.5), 200);
+     }
   } else { //GAME OVER
     fill(255, 0, 0);
     text("GAME OVER", floor(-textWidth("GAME OVER")/2 + 0.5), -100);
