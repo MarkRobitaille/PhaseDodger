@@ -120,8 +120,7 @@ void setup() {
   phaseHold = false; // Default is swap phase with space
 
   // Initialize UI Variables
-  //highScore = int(scoreString[0]);
-  highScore = 0;
+  highScore = int(scoreString[0]);
   currentScore = 0;
   lives = 3;
   level = 1;
