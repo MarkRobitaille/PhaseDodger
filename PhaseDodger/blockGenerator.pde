@@ -25,6 +25,12 @@ public blockGenerator(float numLanes, float top, float bottom){
     }
 
 }
+public boolean nextLevel(){
+  return levelOver && blockList.size() <=0;
+   
+  }
+  
+ 
 public void drawBlocks(){
     for (int i = 0; i< blockList.size(); i++) {
         blockList.get(i).drawMe();
@@ -40,7 +46,7 @@ public void run(float speed){
 }
 public void fillArray(){
   
-  if(blockList.size()< numLanes*numLanes){
+  if(blockList.size()< numLanes*10){
       this.generate();
   }
 }
@@ -89,13 +95,19 @@ public void updateBlockPos(float speed){
 }
 public void cleanUpArrayList(){
     for (int i = 0; i < blockList.size(); i++) {
-           if(blockList.get(i).pos.y <= -1){ 
+           if(blockList.get(i).pos.y+ blockList.get(i).h/2  <= bottom){ 
              blockList.remove(i);
              i--;
+             blockScore += 10;
            }
            
              
 
     }
+}
+public int getBlockScore(){
+  int out = blockScore;
+  blockScore = 0;
+  return out;
 }
 }
