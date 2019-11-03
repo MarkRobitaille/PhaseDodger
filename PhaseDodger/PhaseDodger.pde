@@ -13,18 +13,14 @@ color pinkPhase = color(255,192,203);
 int gameMode; // For now default to right in the game, change once title screen is made
 // Setting for phase controls
 boolean phaseHold; // If true, player must hold space key to change phase
-float gameSpeed;
-
+float [] gameSpeedArr = {0.014,0.016,0.017,0.018,0.019,0.02,0.0201,0.0204,0.021};
 // Enemy variables
 ArrayList<gameEnemy> gameEnemies;
 
 int[] levelArray = {100, 500, 1000, 2000, 4000, 8000, 16000, 32000,64000};
 blockGenerator gen;
 
-//int[] levelArray = {100, 500, 1000};
-
 // Player variables
-PVector[] playerPiece;
 PVector playerTranslation;
 float playerScale;
 boolean moveRight;
@@ -51,24 +47,29 @@ boolean newHighScore;
 int gameOverStep;
 PFont font;
 PImage splashImg;
-PImage alienImg;
+//PImage alienImg;
+PImage[] enemyImgArray;
 PImage blueShip;
 PImage pinkShip;
-//File I/0
-String highscoreFile = "highscore.txt";
-//BufferedReader highscoreReader;
-//PrintWriter highscoreWriter
+
  String scoreString[];
 void setup() {
-  // highscoreReader = createReader(highscoreFile);
-  //highscoreWriter = createWriter(highscoreFile);
-  alienImg = loadImage("data/enemy.png");
+
+ //alienImg = loadImage("data/enemy.png");
+enemyImgArray = new PImage[6];
+enemyImgArray[0] = loadImage("data/enemy.png");
+enemyImgArray[1] = loadImage("data/enemy2.png");
+enemyImgArray[2] = loadImage("data/enemy3.png");
+enemyImgArray[3] = loadImage("data/enemy4.png");
+enemyImgArray[4] = loadImage("data/enemy5.png");
+enemyImgArray[5] = loadImage("data/enemy6.png");
+
   blueShip = loadImage("data/playerblue.png");
   pinkShip = loadImage("data/playerpink.png");
   scoreString = loadStrings("highscore.txt");
    
-  gen = new blockGenerator(2, 1, -1);
-  size(800, 800, P3D);
+
+  size(800,800, P3D);
   //surface.setResizable(true); // Make it work maximized?
   ortho(-1, 1, 1, -1);
   hint(DISABLE_OPTIMIZED_STROKE);
@@ -82,6 +83,7 @@ void setup() {
   currentScore = 0;
   lives = 3;
   level = 1;
+  //gameSpeed = level-1;
   //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
@@ -90,10 +92,6 @@ void setup() {
   
   // Player variables
   // Set up starting player location
-  playerPiece = new PVector[3];
-  playerPiece[0] = new PVector(0,1);
-  playerPiece[1] = new PVector(-1,-1);
-  playerPiece[2] = new PVector(1,-1);
   playerScale = 0.1;
   // Player movement
   playerTranslation = new PVector(0.0, -0.8);
@@ -115,6 +113,7 @@ void setup() {
   
   // Enemy variables
   gameEnemies = new ArrayList();
+  gen = new blockGenerator(level + 1 , 1, -1);
 }
 
 void draw() {
@@ -125,7 +124,7 @@ void draw() {
   if (gameMode == 0) { // Playing game
     if (playerAlive) {
       noStroke();
-      gen.run(0.01);
+      gen.run(gameSpeedArr[level-1]);
       currentScore += gen.getBlockScore();
       changeLevel();
       
@@ -493,7 +492,8 @@ void addEnemy() {
   
   if (gameEnemies.size()<levelValue+1 && Math.random()>0.985-(5*levelValue)) {
     PVector startLocation = new PVector((float)Math.random()*2.0-1.0,  1.25);
-    gameEnemies.add(new gameEnemy(startLocation, playerTranslation, alienImg)); 
+    int alienIndex = int(random(enemyImgArray.length));
+    gameEnemies.add(new gameEnemy(startLocation, playerTranslation, enemyImgArray[alienIndex])); 
   }
 }
 
@@ -636,10 +636,6 @@ void resetGame() {
   
   // Player variables
   // Set up starting player location
-  playerPiece = new PVector[3];
-  playerPiece[0] = new PVector(0,1);
-  playerPiece[1] = new PVector(-1,-1);
-  playerPiece[2] = new PVector(1,-1);
   playerScale = 0.1;
   // Player movement
   playerTranslation = new PVector(0.0, -0.8);
