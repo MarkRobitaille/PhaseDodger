@@ -33,6 +33,8 @@ boolean moveUp;
 boolean moveDown;
 boolean playerPhase; // False is pink, true is blue
 boolean playerAlive;
+PVector hitboxPos;
+float hitboxRadius;
 
 // Player death
 int deathTimer;
@@ -50,6 +52,8 @@ int gameOverStep;
 PFont font;
 PImage splashImg;
 PImage alienImg;
+PImage blueShip;
+PImage pinkShip;
 //File I/0
 String highscoreFile = "highscore.txt";
 //BufferedReader highscoreReader;
@@ -58,9 +62,9 @@ String highscoreFile = "highscore.txt";
 void setup() {
   // highscoreReader = createReader(highscoreFile);
   //highscoreWriter = createWriter(highscoreFile);
- alienImg = loadImage("data/enemy.png");
-
- 
+  alienImg = loadImage("data/enemy.png");
+  blueShip = loadImage("data/playerblue.png");
+  pinkShip = loadImage("data/playerpink.png");
   scoreString = loadStrings("highscore.txt");
    
   gen = new blockGenerator(2, 1, -1);
@@ -78,7 +82,7 @@ void setup() {
   currentScore = 0;
   lives = 3;
   level = 1;
-  textMode(SHAPE); //Makes text not fuzzy
+  //textMode(SHAPE); //Makes text not fuzzy
   font = loadFont("JoystixMonospace-Regular-20.vlw");
   splashImg = loadImage("SplashLogo.png");
   newHighScore = false;
@@ -97,7 +101,13 @@ void setup() {
   moveLeft = false;
   moveUp = false;
   moveDown = false;
-  playerPhase = false; 
+  playerPhase = false;
+  // Initialize hitbox for player
+  hitboxPos = new PVector();
+  hitboxPos = playerTranslation.copy();
+  hitboxPos.y -= 0.025;
+  hitboxRadius = playerScale/3;
+  // Player Death/Life variables
   playerAlive = true;
   deathTimer = 0;
   deathStep = 0;
@@ -127,10 +137,8 @@ void draw() {
       // CHECK FOR COLLISIONS
   
       // Find player's hitbox details (hitbox is circle) 
-      PVector hitboxPos = new PVector();
       hitboxPos = playerTranslation.copy();
       hitboxPos.y -= 0.025;
-      float hitboxRadius = playerScale/2;
       
       boolean hit = false; 
       
@@ -425,27 +433,25 @@ void drawPlayer() {
   translate(playerTranslation.x, playerTranslation.y);
   rotate(playerRotation);
   scale(playerScale, playerScale);
-  strokeWeight(1/playerScale);
+  
+  imageMode(CENTER);
   if (playerPhase) {
-    fill(bluePhase);
+    image(blueShip, 0, 0, 2, 2);
   } else {
-    fill(pinkPhase);
+    image(pinkShip, 0, 0, 2, 2);
   }
   
   if(!playerAlive) {
     fill(255,0,0);
   }
   
-  triangle(playerPiece[0].x, playerPiece[0].y, 
-  playerPiece[1].x, playerPiece[1].y, 
-  playerPiece[2].x, playerPiece[2].y);
-
-  strokeWeight(1);
   resetMatrix();
-  
+  strokeWeight(1);
   if (debug) {
-    ellipse(playerTranslation.x, playerTranslation.y-0.025, 0.1, 0.1);
+    fill(0);
+    ellipse(hitboxPos.x, hitboxPos.y, hitboxRadius*2, hitboxRadius*2);
   }
+  
 }
 
 void resetAfterDeath() {
@@ -504,7 +510,7 @@ void updateEnemies() {
 
 void drawEnemies() {
   for (int i=0; i<gameEnemies.size(); i++) {
-    gameEnemies.get(i).drawMe();
+    gameEnemies.get(i).drawMe(debug);
   }
 }
 
