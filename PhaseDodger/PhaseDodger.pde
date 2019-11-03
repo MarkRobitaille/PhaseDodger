@@ -1,5 +1,5 @@
 import processing.sound.*;
-
+import ddf.minim.*;
 //CONSTANTS
 
 final float playerSpeed = 0.03;
@@ -57,11 +57,16 @@ PImage[] blueShip;
 PImage[] pinkShip;
 
 String scoreString[];
-SoundFile gameMusic;
-SoundFile deathSound;
-SoundFile gameOverSound;
-SoundFile menuMusic;
-SoundFile scoreSound;
+//SoundFile gameMusic;
+//SoundFile deathSound;
+Minim minim;
+//SoundFile gameOverSound;
+//SoundFile menuMusic;
+AudioPlayer gameMusic;
+AudioPlayer deathSound;
+AudioPlayer gameOverSound;
+AudioPlayer menuMusic;
+AudioPlayer scoreSound;
 // particle system testing
 particleSystem playerExplosion;
 PImage explosionImage;
@@ -99,10 +104,15 @@ void setup() {
   scoreString = loadStrings("highscore.txt");
    
   // Load music files
-  gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
-  menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
-  deathSound = new SoundFile(this, "ship-explosion.mp3");
-  scoreSound = new SoundFile(this, "coinsound.wav");
+  //gameMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
+  //menuMusic = new SoundFile(this, "PegJam2019 - Phase Dodger - 1 - Gameplay.wav");
+  //deathSound = new SoundFile(this, "ship-explosion.mp3");
+  
+  minim = new Minim(this);
+  gameMusic = minim.loadFile("PegJam2019 - Phase Dodger - 1 - Gameplay.mp3");
+  menuMusic = minim.loadFile("PhaseDodgerMenu.mp3");
+  deathSound = minim.loadFile("ship-explosion.mp3");
+  scoreSound = minim.loadFile("coinsound.wav");
   //gameOverSound = new SoundFile(this, "Retro-game-over-sound-effect.mp3");
 
   // Initialize game state variables
@@ -201,6 +211,7 @@ void draw() {
       
       // If player is dead, pause block movement, player turns red, lose life, start again?
       if (!playerAlive) {
+        deathSound.rewind();
         deathSound.play();
         deathTimer=millis();
         playerExplosion = new particleSystem(new PVector(playerTranslation.x,playerTranslation.y), explosionImage, 0.025f, 0.025f, 1000, 1000, 10, 0.2f, 1f);
@@ -429,8 +440,9 @@ void keyPressed() {
         gameMode = 0;
         break;
       case 'q':
-        gameMusic.stop();
         resetGame();
+        gameMusic.pause();
+        gameMusic.rewind();
         break;
       case ' ':
         gameMode = 0;
@@ -649,11 +661,13 @@ void drawUI() {
   textAlign(LEFT);
   
   if(gameMode == 0 && !gameMusic.isPlaying()){
-    menuMusic.stop();
+    menuMusic.pause();
+    menuMusic.rewind();
     //gameOverMusic end
     gameMusic.loop();
   }else if(gameMode == 4){ //gameOverMusic
-    gameMusic.stop();
+    gameMusic.pause();
+    gameMusic.rewind();
     //gameOverSound.play();
     
   }
@@ -758,6 +772,7 @@ void drawUI() {
       if (highScore < currentScore) {
         highScore += 1;
         if (!scoreSound.isPlaying()) {
+          scoreSound.rewind();
           scoreSound.play();
         }
       } else {
