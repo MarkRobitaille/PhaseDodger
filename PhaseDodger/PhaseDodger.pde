@@ -246,7 +246,7 @@ void draw() {
       }
     } else if (deathStep == 1) {
       drawUI();
-      if (deathTimer + 3000 < millis()) {
+      if (deathTimer + 2500 < millis()) {
         resetAfterDeath();
       } 
     }
