@@ -11,19 +11,19 @@ Made in less than 48 hours for Peg Jam 2019 with the theme "Parallel Worlds". Th
 * [Jonas Pagé](https://github.com/MynxNightshade) - UI & Particle Programming and Art
 * [Mark Robitaille](https://github.com/MarkRobitaille) - Gameplay Programming  
   
-### How do I play the game?  
+## How do I play the game?  
 
 There are two ways to download and play the game. The first method is the most convenient way to get it up and running fast if you have Windows as your operating system. However, due to Processing's exports sometimes not working on certain computers, there is a second more cumbersome method if you want to play (or if you use Mac/OS).
 
-#### Method 1: Easier Option (Windows Only)
+### Method 1: Easier Option (Windows Only)
 
 1. Go to the [game's itch.io page](https://nightshade.itch.io/phasedodger).  
 2. Download the game's zip file.  
 3. Extract the zip file and run "PhaseDodger.exe".  
 
-#### Method 2: The Alternative  
+### Method 2: The Alternative  
 
-##### Download Phase Dodger
+#### Download Phase Dodger
 
 First off, I'd recommend downloading the game itself from this GitHub repository.
 
@@ -32,7 +32,7 @@ First off, I'd recommend downloading the game itself from this GitHub repository
 ![Download Button Location](https://i.imgur.com/odPSesO.png)
 3. Extract the zip file containing the game's files.
 
-##### Download Processing  
+#### Download Processing  
 
 Now you'll need to get Processing to run the game in.
 
@@ -40,7 +40,7 @@ Now you'll need to get Processing to run the game in.
 5. Click on the download link for the appropriate operating system.  
 6. Extract the zip file containing Processing's executable. 
 
-##### Open Processing and Phase Dodger
+#### Open Processing and Phase Dodger
 
 With processing and the game downloaded, open them up! Don't hit that run button just yet though...
 
@@ -48,7 +48,7 @@ With processing and the game downloaded, open them up! Don't hit that run button
     * Note: For Windows users, this will be the "rocessing.exe" file. For other operating systems, this will likely be different.  
 8. Open Phase Dodger's main file by going to File -> Open and selecting PhaseDodger.pde from the previously downloaded game files in step 1.  
 
-##### Install Minim
+#### Install Minim
 
 The last thing we need to do is get the audio library Minim which is what powers the music and sound effects. This is the most painful step for those unfamiliar with Processing but should be pretty quick (only a minute or two).
 
