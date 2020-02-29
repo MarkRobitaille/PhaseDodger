@@ -11,7 +11,7 @@ Made in less than 48 hours for Peg Jam 2019 with the theme "Parallel Worlds". Th
 * [Jonas Pagé](https://github.com/MynxNightshade) - UI & Particle Programming and Art
 * [Mark Robitaille](https://github.com/MarkRobitaille) - Gameplay Programming  
   
-## How do I play the game?  
+## How Do I Play The Game?  
 
 There are two ways to download and play the game. The first method is the most convenient way to get it up and running fast if you have Windows as your operating system. However, due to Processing's exports sometimes not working on certain computers, there is a second more cumbersome method if you want to play (or if you use Mac/OS).
 
