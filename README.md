@@ -25,12 +25,15 @@ There are two ways to download and play the game. The first method is the most c
 
 ##### Download Phase Dodger
 
+First off, I'd recommend downloading the game itself from this GitHub repository.
+
 1. Go to the [Phase Dodger repository's main page](https://github.com/MarkRobitaille/PhaseDodger) (note: You're likely already here)
 2. Hover over "Clone or download" and click download.
 3. Extract the zip file containing the game's files.
 
 ##### Download Processing  
 
+Now you'll need to get Processing to run the game in.
 
 4. Go to the [Processing web site](https://processing.org/download/).  
 5. Click on the download link for the appropriate operating system.  
@@ -38,15 +41,21 @@ There are two ways to download and play the game. The first method is the most c
 
 ##### Open Processing and Phase Dodger
 
-7. Start the Processing program.  
-  * Note: For Windows users, this will be the "rocessing.exe" file. For other operating systems, this will likely be different.  
+With processing and the game downloaded, open them up! Don't hit that run button just yet though...
+
+7. Start the Processing program.
+    * Note: For Windows users, this will be the "rocessing.exe" file. For other operating systems, this will likely be different.  
 8. Open Phase Dodger's main file by going to File -> Open and selecting PhaseDodger.pde from the previously downloaded game files in step 1.  
 
 ##### Install Minim
 
+The last thing we need to do is get the audio library Minim which is what powers the music and sound effects. This is the most painful step for those unfamiliar with Processing but should be pretty quick (only a minute or two).
+
 9. Click "Sketch" -> "Import Library" -> "Add Library..." on the top menu of Processing to open the "Contribution Manager".  
-10. Search for Minum by typing into the "Filter" input field at the top left.  
-11. Click on the result for Minum that was created by Damien Di Fide and Anderson Mills.  
+10. Search for Minim by typing into the "Filter" input field at the top left.  
+11. Click on the result for Minim that was created by Damien Di Fide and Anderson Mills.  
 12. Click the "Install" button in the bottom section of the window.  
 13. Close the Contribution Manager window.
 14. Click the run button (the button on the top left with the play button) to start the game.  
+
+Now you're finally able to play the game. :)
