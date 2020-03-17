@@ -45,12 +45,12 @@ Now you'll need to get Processing to run the game in.
 With processing and the game downloaded, open them up! Don't hit that run button just yet though...
 
 7. Start the Processing program.
-    * Note: For Windows users, this will be the "rocessing.exe" file. For other operating systems, this will likely be different.  
-8. Open Phase Dodger's main file by going to File -> Open and selecting PhaseDodger.pde from the previously downloaded game files in step 1.  
+    * Note: For Windows users, this will be the "processing.exe" file. For other operating systems, this will likely be different.  
+8. Open Phase Dodger's main file by going to File -> Open and selecting PhaseDodger.pde from the downloaded game files in steps 1-3.  
 
 #### Install Minim
 
-The last thing we need to do is get the audio library Minim which is what powers the music and sound effects. This is the most painful step for those unfamiliar with Processing but should be pretty quick (only a minute or two).
+The last thing we need to do is get the audio library Minim, which is what powers the music and sound effects. This is the most painful step for those unfamiliar with Processing but should be pretty quick (only a minute or two).
 
 9. Click "Sketch" -> "Import Library" -> "Add Library..." on the top menu of Processing to open the "Contribution Manager".  
 ![Add Library Button](https://i.imgur.com/7VM5fOR.png)  
