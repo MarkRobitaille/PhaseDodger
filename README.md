@@ -8,7 +8,7 @@ Made in less than 48 hours for Peg Jam 2019 with the theme "Parallel Worlds". Th
 
 * [Liam Berry](https://liam-berry.itch.io/) - Music
 * [John Manning](https://github.com/impaledvlad) - Audio & Gameplay Programming
-* [Jonas Pagé](https://github.com/MynxNightshade) - UI & Particle Programming and Art
+* [June Pagé](https://github.com/MynxNightshade) - UI & Particle Programming and Art
 * [Mark Robitaille](https://github.com/MarkRobitaille) - Gameplay Programming  
   
 ## How Do I Play The Game?  
